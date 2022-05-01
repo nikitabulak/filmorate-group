@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.model;
 
+import lombok.Builder;
 import lombok.Data;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
@@ -9,7 +11,7 @@ import java.time.LocalDate;
 public class User {
     private int id;
     @NotNull @Email private String email;
-    @NotNull @NotBlank private String login;
-    @NotNull @NotBlank private String name;
+    @NotBlank private String login;
+    private String name;
     @NotNull @Past private LocalDate birthday;
 }

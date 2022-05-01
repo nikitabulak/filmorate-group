@@ -30,15 +30,19 @@ public class UserController {
     }
 
     @PostMapping
-    public void create(@Valid @RequestBody User user) {
+    public User create(@Valid @RequestBody User user) {
+        if (user.getLogin().contains(" "))
+            throw new ru.yandex.practicum.filmorate.exception.ValidationException("Логин не должен содержать пробелы");
         int id = generateId();
         user.setId(id);
+        if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
         users.put(id, user);
         log.info("Добавлен новый пользователь: {}", user);
+        return user;
     }
 
     @PutMapping
-    public void saveUser(@Valid @RequestBody User user) {
+    public User saveUser(@Valid @RequestBody User user) {
         int id = user.getId();
         if (id < 0) throw new ValidationException("PUT: отрицательный id " + id);
         if (!users.containsKey(id)) throw new ValidationException("PUT: несуществующий id" + id);
@@ -51,11 +55,20 @@ public class UserController {
             users.put(user.getId(), user);
             log.info("Данные пользователя {} успешно обновлены", user);
         }
+        return user;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.warn("Ошибка валидации: " + e.getMessage());
+        return new ResponseEntity<>("not valid due to validation error: " + e.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    @ExceptionHandler(ru.yandex.practicum.filmorate.exception.ValidationException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<String> handleValidationException
+            (ru.yandex.practicum.filmorate.exception.ValidationException e) {
         log.warn("Ошибка валидации: " + e.getMessage());
         return new ResponseEntity<>("not valid due to validation error: " + e.getMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR);
