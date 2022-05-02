@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -57,20 +56,12 @@ public class UserController {
         }
         return user;
     }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.warn("Ошибка валидации: " + e.getMessage());
-        return new ResponseEntity<>("not valid due to validation error: " + e.getMessage(),
-                HttpStatus.INTERNAL_SERVER_ERROR);
-    }
     @ExceptionHandler(ru.yandex.practicum.filmorate.exception.ValidationException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<String> handleValidationException
             (ru.yandex.practicum.filmorate.exception.ValidationException e) {
         log.warn("Ошибка валидации: " + e.getMessage());
         return new ResponseEntity<>("not valid due to validation error: " + e.getMessage(),
-                HttpStatus.INTERNAL_SERVER_ERROR);
+                HttpStatus.BAD_REQUEST);
     }
 }

@@ -61,7 +61,7 @@ public class UserControllerTest {
                                 "}")).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(500, response.statusCode());
+        assertEquals(400, response.statusCode());
     }
 
     @Test
@@ -78,7 +78,7 @@ public class UserControllerTest {
                                 "}")).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(500, response.statusCode());
+        assertEquals(400, response.statusCode());
     }
 
     @Test
@@ -95,7 +95,7 @@ public class UserControllerTest {
                                 "}")).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(500, response.statusCode());
+        assertEquals(400, response.statusCode());
     }
 
     @Test
@@ -134,6 +134,6 @@ public class UserControllerTest {
                                 "}")).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(500, response.statusCode());
+        assertEquals(400, response.statusCode());
     }
 }
