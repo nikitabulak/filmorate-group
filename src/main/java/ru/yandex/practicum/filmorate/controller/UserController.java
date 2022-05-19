@@ -1,67 +1,66 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import javax.validation.Valid;
-import javax.validation.ValidationException;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
-@Slf4j
 @RestController
+@Validated
 @RequestMapping("/users")
 public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
-    private int id = 0;
+    private final UserStorage userStorage;
+    private final UserService userService;
 
-    private int generateId() {
-        return ++id;
+    @Autowired
+    public UserController(@Qualifier("inMemoryUserStorage") UserStorage userStorage, UserService userService) {
+        this.userStorage = userStorage;
+        this.userService = userService;
     }
 
     @GetMapping
     public Collection<User> findAll() {
-        return users.values();
+        return userStorage.getUsers();
+    }
+
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable Long id) {
+        return userStorage.getUserById(id);
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        if (user.getLogin().contains(" "))
-            throw new ru.yandex.practicum.filmorate.exception.ValidationException("Логин не должен содержать пробелы");
-        int id = generateId();
-        user.setId(id);
-        if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
-        users.put(id, user);
-        log.info("Добавлен новый пользователь: {}", user);
-        return user;
+        return userStorage.addUser(user);
     }
 
     @PutMapping
     public User saveUser(@Valid @RequestBody User user) {
-        int id = user.getId();
-        if (id < 0) throw new ValidationException("PUT: отрицательный id " + id);
-        if (!users.containsKey(id)) throw new ValidationException("PUT: несуществующий id" + id);
-        if (id == 0) {
-            id = generateId();
-            user.setId(id);
-            users.put(id, user);
-            log.info("Добавлен новый пользователь {}", user);
-        } else {
-            users.put(user.getId(), user);
-            log.info("Данные пользователя {} успешно обновлены", user);
-        }
-        return user;
+        return userStorage.updateUser(user);
     }
-    @ExceptionHandler(ru.yandex.practicum.filmorate.exception.ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<String> handleValidationException
-            (ru.yandex.practicum.filmorate.exception.ValidationException e) {
-        log.warn("Ошибка валидации: " + e.getMessage());
-        return new ResponseEntity<>("not valid due to validation error: " + e.getMessage(),
-                HttpStatus.BAD_REQUEST);
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.deleteFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public Collection<User> findFriends(@PathVariable Long id) {
+        return userService.findFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Collection<User> sharedFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        return userService.findSharedFriends(id, otherId);
     }
 }
