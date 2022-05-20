@@ -22,12 +22,27 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
+    public User addUser(User user) {
+        return userStorage.addUser(user);
+    }
+    public User updateUser(User user) {
+        return userStorage.updateUser(user);
+    }
+    public Collection<User> getUsers() {
+        return userStorage.getUsers();
+    }
+    public User deleteUser(User user) {
+        return userStorage.deleteUser(user);
+    }
+    public User getUserById(Long id) {
+        return userStorage.getUserById(id);
+    }
     public void addFriend(Long id, Long friendId) {
         User user = userStorage.getUserById(id);
         User userFriend = userStorage.getUserById(friendId);
         user.getFriends().add(friendId);
         userFriend.getFriends().add(id);
-        log.info("Пользователь id={} добавил в друзья пользователя с id={}", id, friendId);
+        log.info("User id = {} added to friends user id={}", id, friendId);
     }
 
     public void deleteFriend(Long id, Long friendId) {
@@ -35,7 +50,7 @@ public class UserService {
         User userFriend = userStorage.getUserById(friendId);
         user.getFriends().remove(friendId);
         userFriend.getFriends().remove(id);
-        log.info("Пользователь id={} удалил из друзей пользователя с id={}", id, friendId);
+        log.info("User id = {} deleted from friends user id={}", id, friendId);
     }
 
     public Collection<User> findFriends(Long id) {

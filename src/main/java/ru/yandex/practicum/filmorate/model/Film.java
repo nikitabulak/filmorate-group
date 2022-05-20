@@ -25,4 +25,16 @@ public class Film {
     public int getRating(){
         return likes.size();
     }
+
+    public boolean hasLikeFromUser(Long userId) {
+        return likes.contains(userId);
+    }
+
+    public void addLikeFromUser(Long userId) {
+        likes.add(userId);
+    }
+
+    public void removeLikeFromUser(Long userId) {
+        likes.remove(userId);
+    }
 }

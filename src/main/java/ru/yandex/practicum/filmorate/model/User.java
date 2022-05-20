@@ -11,7 +11,7 @@ import java.util.Set;
 public class User {
     private Long id;
     @NotNull @Email private String email;
-    @NotBlank private String login;
+    @Pattern(regexp = "\\S+") private String login;
     private String name;
     @NotNull @Past private LocalDate birthday;
     private Set<Long> friends = new HashSet<>();

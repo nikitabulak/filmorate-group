@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,16 +23,33 @@ public class FilmService {
         this.filmStorage = filmStorage;
     }
 
+    public Film addFilm(Film film) {
+        return filmStorage.addFilm(film);
+    }
+
+    public Film updateFilm(Film film) {
+        return filmStorage.updateFilm(film);
+    }
+
+    public Collection<Film> getFilms() {
+        return filmStorage.getFilms();
+    }
+
+    public Film getFilmById(Long id) {
+        return filmStorage.getFilmById(id);
+    }
+
     public void addLike(Long id, Long userId) {
-        log.info("Пользователь {} поставил лайк фильму {}", userId, id);
-        filmStorage.getFilmById(id).getLikes().add(userId);
+        log.info("User id = {} set like film id = {}", userId, id);
+        filmStorage.getFilmById(id).addLikeFromUser(userId);
     }
 
     public void removeLike(Long id, Long userId) {
-        if (!filmStorage.getFilmById(id).getLikes().contains(userId))
-            throw new UserNotFoundException(String.format("Пользователь с id %d не ставил лайк фильму", userId));
-        log.info("Пользователь {} удалил лайк к фильму {}", userId, id);
-        filmStorage.getFilmById(id).getLikes().remove(userId);
+        if (!filmStorage.getFilmById(id).hasLikeFromUser(userId))
+            throw new UserNotFoundException(String.format("User id = %d trying to delete like to film id = %d, " +
+                    "which is absent", userId, id));
+        log.info("User id = {} deleted like to film id = {}", userId, id);
+        filmStorage.getFilmById(id).removeLikeFromUser(userId);
     }
 
     public List<Film> getFilmsByRating(int count) {

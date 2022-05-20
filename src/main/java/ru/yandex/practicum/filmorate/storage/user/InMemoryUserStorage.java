@@ -21,12 +21,10 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User addUser(User user) {
-        if (user.getLogin().contains(" "))
-            throw new ru.yandex.practicum.filmorate.exception.ValidationException("Логин не должен содержать пробелы");
         Long id = generateId();
         user.setId(id);
         users.put(id, user);
-        log.info("Добавлен новый пользователь: {}", user);
+        log.info("New user added: {}", user);
         return user;
     }
 
@@ -34,9 +32,10 @@ public class InMemoryUserStorage implements UserStorage {
     public User updateUser(User user) {
         Long id = user.getId();
         if (!users.containsKey(id))
-            throw new UserNotFoundException(String.format("Пользователь с id %d не существует", id));
+            throw new UserNotFoundException(String.format("Attempt to update user with " +
+                    "absent id = %d", id));
         users.put(user.getId(), user);
-        log.info("Данные пользователя {} успешно обновлены", user);
+        log.info("User {} has been successfully updated", user);
         return user;
     }
 
@@ -48,13 +47,14 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User deleteUser(User user) {
         if (users.containsKey(user.getId())) return users.remove(user.getId());
-        else throw new UserNotFoundException(String.format("Пользователь с id %d не найден", id));
+        else throw new UserNotFoundException(String.format("Attempt to delete user with " +
+                "absent id = %d", id));
     }
 
     @Override
     public User getUserById(Long id) {
         if (!users.containsKey(id))
-            throw new UserNotFoundException(String.format("Пользователь с id %d не найден", id));
+            throw new UserNotFoundException(String.format("Request user with absent id = %d", id));
         return users.get(id);
     }
 }

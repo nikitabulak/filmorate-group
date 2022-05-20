@@ -24,11 +24,12 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) {
         if (film.getReleaseDate().isBefore(releaseDate))
-            throw new ru.yandex.practicum.filmorate.exception.ValidationException("Дата релиза раньше releaseDate");
+            throw new ru.yandex.practicum.filmorate.exception.ValidationException("Attempt to add film " +
+                    "with releaseDate before 28-12-1895");
         Long id = generateId();
         film.setId(id);
         films.put(id, film);
-        log.info("Добавлен новый фильм: {}", film);
+        log.info("New film added: {}", film);
         return film;
     }
 
@@ -36,9 +37,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film updateFilm(Film film) {
         Long id = film.getId();
         if (!films.containsKey(id))
-            throw new FilmNotFoundException(String.format("Фильм с id %d не существует", id));
+            throw new FilmNotFoundException(String.format("Attempt to update film with absent id = %d", id));
         films.put(id, film);
-        log.info("Фильм {} успешно обновлен", film);
+        log.info("Film {} has been successfully updated", film);
         return film;
     }
 
@@ -49,7 +50,17 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(Long id) {
-        if (!films.containsKey(id)) throw new FilmNotFoundException(String.format("Фильм с id %d не найден", id));
+        if (!films.containsKey(id))
+            throw new FilmNotFoundException(String.format("Request film by id when id is absent, id = %d", id));
         return films.get(id);
+    }
+
+    @Override
+    public Film deleteFilm(Film film) {
+        if (films.containsKey(film.getId())) {
+            log.info("Film {} was deleted", film);
+            return films.remove(film.getId());
+        }
+        else throw new FilmNotFoundException(String.format("Attempt to delete film with absent id = %d", id));
     }
 }
