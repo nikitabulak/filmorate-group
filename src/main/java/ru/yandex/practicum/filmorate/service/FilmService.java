@@ -5,9 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,13 +20,26 @@ import java.util.stream.Collectors;
 public class FilmService {
 
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
+    private Long id = 0L;
+    private static final LocalDate releaseDate = LocalDate.of(1895, 12, 28);
 
     @Autowired
-    public FilmService(@Qualifier("inMemoryFilmStorage") FilmStorage filmStorage) {
+    public FilmService(@Qualifier("inMemoryFilmStorage") FilmStorage filmStorage,
+                       @Qualifier("inMemoryUserStorage") UserStorage userStorage) {
         this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
+    }
+
+    private Long generateId() {
+        return ++id;
     }
 
     public Film addFilm(Film film) {
+        if (film.getReleaseDate().isBefore(releaseDate))
+            throw new ValidationException("Attempt to add film " +
+                    "with releaseDate before 28-12-1895");
+        film.setId(generateId());
         return filmStorage.addFilm(film);
     }
 
@@ -41,6 +57,9 @@ public class FilmService {
 
     public void addLike(Long id, Long userId) {
         log.info("User id = {} set like film id = {}", userId, id);
+        userStorage.getUserById(userId);
+        // result is ignored because this operation checks that id exists,
+        // if not it will throw the exception
         filmStorage.getFilmById(id).addLikeFromUser(userId);
     }
 
