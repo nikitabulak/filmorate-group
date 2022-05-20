@@ -16,15 +16,22 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
     private final UserStorage userStorage;
+    private Long id = 0L;
 
     @Autowired
     public UserService(@Qualifier("inMemoryUserStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
+    private Long generateId() {
+        return ++id;
+    }
+
     public User addUser(User user) {
+        user.setId(generateId());
         return userStorage.addUser(user);
     }
+
     public User updateUser(User user) {
         return userStorage.updateUser(user);
     }

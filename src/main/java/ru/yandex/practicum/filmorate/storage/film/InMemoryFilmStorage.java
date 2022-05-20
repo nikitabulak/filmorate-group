@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,21 +13,10 @@ import java.util.Map;
 @Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
-    private Long id = 0L;
-    private static final LocalDate releaseDate = LocalDate.of(1895, 12, 28);
-
-    private Long generateId() {
-        return ++id;
-    }
 
     @Override
     public Film addFilm(Film film) {
-        if (film.getReleaseDate().isBefore(releaseDate))
-            throw new ru.yandex.practicum.filmorate.exception.ValidationException("Attempt to add film " +
-                    "with releaseDate before 28-12-1895");
-        Long id = generateId();
-        film.setId(id);
-        films.put(id, film);
+        films.put(film.getId(), film);
         log.info("New film added: {}", film);
         return film;
     }
@@ -61,6 +49,6 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.info("Film {} was deleted", film);
             return films.remove(film.getId());
         }
-        else throw new FilmNotFoundException(String.format("Attempt to delete film with absent id = %d", id));
+        else throw new FilmNotFoundException(String.format("Attempt to delete film with absent id = %d", film.getId()));
     }
 }

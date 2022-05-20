@@ -13,17 +13,10 @@ import java.util.Map;
 @Component("inMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
-    private Long id = 0L;
-
-    private Long generateId() {
-        return ++id;
-    }
 
     @Override
     public User addUser(User user) {
-        Long id = generateId();
-        user.setId(id);
-        users.put(id, user);
+        users.put(user.getId(), user);
         log.info("New user added: {}", user);
         return user;
     }
@@ -48,7 +41,7 @@ public class InMemoryUserStorage implements UserStorage {
     public User deleteUser(User user) {
         if (users.containsKey(user.getId())) return users.remove(user.getId());
         else throw new UserNotFoundException(String.format("Attempt to delete user with " +
-                "absent id = %d", id));
+                "absent id = %d", user.getId()));
     }
 
     @Override
