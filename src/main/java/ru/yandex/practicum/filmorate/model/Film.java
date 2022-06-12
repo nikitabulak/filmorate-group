@@ -1,17 +1,40 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.time.DurationMin;
 
 import javax.validation.constraints.*;
-import java.time.Duration;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class Film {
-    private int id;
+    private Long id;
     @NotBlank private String name;
     @NotBlank @Size(max = 200) private String description;
     @NotNull @Past private LocalDate releaseDate;
-    @NotNull @DurationMin(minutes = 0L) private Duration duration;
+    @NotNull @Positive private int duration;
+    private Set<Long> likes = new HashSet<>();
+
+    public Film(String name, String description, LocalDate releaseDate, int duration) {
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+    }
+    public int getRating(){
+        return likes.size();
+    }
+
+    public boolean hasLikeFromUser(Long userId) {
+        return likes.contains(userId);
+    }
+
+    public void addLikeFromUser(Long userId) {
+        likes.add(userId);
+    }
+
+    public void removeLikeFromUser(Long userId) {
+        likes.remove(userId);
+    }
 }

@@ -1,69 +1,68 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
 
-@Slf4j
 @RestController
 @Validated
+@Slf4j
 @RequestMapping("/films")
 public class FilmController {
-    private final Map<Integer, Film> films = new HashMap<>();
-    private int id = 0;
-    private static final LocalDate releaseDate = LocalDate.of(1895, 12, 28);
 
-    private int generateId() {
-        return ++id;
+    private final FilmService filmService;
+
+    @Autowired
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
     }
 
     @GetMapping
     public Collection<Film> findAll() {
-        return films.values();
+        log.info("Request all films");
+        return filmService.getFilms();
+    }
+
+    @GetMapping("/{id}")
+    public Film getFilm(@PathVariable Long id) {
+        log.info("Request film by id = {}", id);
+        return filmService.getFilmById(id);
     }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        if (film.getReleaseDate().isBefore(releaseDate))
-            throw new ru.yandex.practicum.filmorate.exception.ValidationException("Дата релиза раньше releaseDate");
-        int id = generateId();
-        film.setId(id);
-        films.put(id, film);
-        log.info("Добавлен новый фильм: {}", film);
-        return film;
+        log.info("Request to add film {}", film);
+        return filmService.addFilm(film);
     }
 
     @PutMapping
-    public Film saveUser(@Valid @RequestBody Film film) {
-        int id = film.getId();
-        if (id < 0)
-            throw new ru.yandex.practicum.filmorate.exception.ValidationException("PUT: отрицательный id " + id);
-        if (!films.containsKey(id))
-            throw new ru.yandex.practicum.filmorate.exception.ValidationException("PUT: несуществующий id" + id);
-        if (id == 0) {
-            id = generateId();
-            film.setId(id);
-            films.put(id, film);
-            log.info("Добавлен новый фильм {}", film);
-        } else {
-            films.put(film.getId(), film);
-            log.info("Фильм {} успешно обновлен", film);
-        }
-        return film;
+    public Film updateFilm(@Valid @RequestBody Film film) {
+        log.info("Request to change film {}", film);
+        return filmService.updateFilm(film);
     }
-    @ExceptionHandler(ru.yandex.practicum.filmorate.exception.ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<String> handleValidationException
-            (ru.yandex.practicum.filmorate.exception.ValidationException e) {
-        log.warn("Ошибка валидации: " + e.getMessage());
-        return new ResponseEntity<>("not valid due to validation error: " + e.getMessage(),
-                HttpStatus.BAD_REQUEST);
+
+    @PutMapping("/{id}/like/{userId}")
+    public void likeFilm(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("Request from user id = {} put like to film id = {}", userId, id);
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public void deleteMapping(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("Request from user id = {} delete like to film id = {}", userId, id);
+        filmService.removeLike(id, userId);
+    }
+
+    @GetMapping("/popular")
+    public Collection<Film> popularFilms(@RequestParam(required = false) Integer count) {
+        log.info("Request best films, count = {}", count);
+        if (count == null) count = 10;
+        return filmService.getFilmsByRating(count);
     }
 }
