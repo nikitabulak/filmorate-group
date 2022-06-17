@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Component("inMemoryUserStorage")
@@ -45,9 +46,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUserById(Long id) {
-        if (!users.containsKey(id))
-            throw new UserNotFoundException(String.format("Request user with absent id = %d", id));
-        return users.get(id);
+    public Optional<User> getUserById(Long id) {
+        return Optional.of(users.get(id));
     }
 }

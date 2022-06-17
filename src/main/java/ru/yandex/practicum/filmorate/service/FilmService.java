@@ -4,27 +4,32 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikesStorage;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class FilmService {
 
     private final FilmStorage filmStorage;
+    private final LikesStorage likesStorage;
     private Long id = 0L;
     private static final LocalDate releaseDate = LocalDate.of(1895, 12, 28);
 
     @Autowired
-    public FilmService(@Qualifier("inMemoryFilmStorage") FilmStorage filmStorage) {
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       LikesStorage likesStorage) {
         this.filmStorage = filmStorage;
+        this.likesStorage = likesStorage;
     }
 
     private Long generateId() {
@@ -35,12 +40,17 @@ public class FilmService {
         if (film.getReleaseDate().isBefore(releaseDate))
             throw new ValidationException("Attempt to add film " +
                     "with releaseDate before 28-12-1895");
-        film.setId(generateId());
-        return filmStorage.addFilm(film);
+        filmStorage.addFilm(film);
+        return film;
     }
 
     public Film updateFilm(Film film) {
-        return filmStorage.updateFilm(film);
+        filmStorage.updateFilm(film);
+        Film filmReturn = filmStorage.getFilmById(film.getId()).orElseThrow(
+                () ->  new FilmNotFoundException(String.format("Request film with absent id = %d", id)));
+        if (film.getGenres() == null) filmReturn.setGenres(null);
+        else if (film.getGenres().isEmpty()) filmReturn.setGenres(new ArrayList<Genre>());
+        return filmReturn;
     }
 
     public Collection<Film> getFilms() {
@@ -48,26 +58,21 @@ public class FilmService {
     }
 
     public Film getFilmById(Long id) {
-        return filmStorage.getFilmById(id);
+        return filmStorage.getFilmById(id)
+                .orElseThrow(() ->  new FilmNotFoundException(String.format("Request film with absent id = %d", id)));
     }
 
     public void addLike(Long id, Long userId) {
+        likesStorage.addLike(id, userId);
         log.info("User id = {} set like film id = {}", userId, id);
-        filmStorage.getFilmById(id).addLikeFromUser(userId);
     }
 
     public void removeLike(Long id, Long userId) {
-        if (!filmStorage.getFilmById(id).hasLikeFromUser(userId))
-            throw new UserNotFoundException(String.format("User id = %d trying to delete like to film id = %d, " +
-                    "which is absent", userId, id));
+        likesStorage.removeLike(id, userId);
         log.info("User id = {} deleted like to film id = {}", userId, id);
-        filmStorage.getFilmById(id).removeLikeFromUser(userId);
     }
 
     public List<Film> getFilmsByRating(int count) {
-        return filmStorage.getFilms().stream()
-                .sorted((x1, x2) -> (x2.getRating() - x1.getRating()))
-                .limit(count)
-                .collect(Collectors.toList());
+        return likesStorage.getPopular(count);
     }
 }
