@@ -7,8 +7,10 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.util.List;
 
@@ -16,34 +18,41 @@ import java.util.List;
 @Slf4j
 public class LikesStorage {
     private final JdbcTemplate jdbcTemplate;
+    private final GenreStorage genreStorage;
+    private final MpaStorage mpaStorage;
+    private final FilmDbStorage filmDbStorage;
+    private final UserDbStorage userDbStorage;
 
-    public LikesStorage(JdbcTemplate jdbcTemplate) {
+    public LikesStorage(JdbcTemplate jdbcTemplate,
+                        GenreStorage genreStorage,
+                        MpaStorage mpaStorage,
+                        FilmDbStorage filmDbStorage, UserDbStorage userDbStorage) {
         this.jdbcTemplate = jdbcTemplate;
+        this.genreStorage = genreStorage;
+        this.mpaStorage = mpaStorage;
+        this.filmDbStorage = filmDbStorage;
+        this.userDbStorage = userDbStorage;
     }
 
     public void addLike(Long id, Long userId) {
-        if (!isFilmExists(id)) throw new FilmNotFoundException("Film not found");
-        if (!isUserExists(userId)) throw new UserNotFoundException("User not found");
+        if (!filmDbStorage.isFilmExists(id)) throw new FilmNotFoundException("Film not found");
+        if (!userDbStorage.isUserExists(userId)) throw new UserNotFoundException("User not found");
         String sql = "INSERT INTO LIKES (user_id, film_id) VALUES (?, ?)";
         jdbcTemplate.update(sql, userId, id);
         log.info("User id = {} add like to film id = {}", userId, id);
     }
 
     public void removeLike(Long id, Long userId) {
-        if (!isFilmExists(id)) throw new FilmNotFoundException("Film not found");
-        if (!isUserExists(userId)) throw new UserNotFoundException("User not found");
+        if (!filmDbStorage.isFilmExists(id)) throw new FilmNotFoundException("Film not found");
+        if (!userDbStorage.isUserExists(userId)) throw new UserNotFoundException("User not found");
+        if (!isLikeExist(userId, id)) throw new UserNotFoundException("User didn't add like to film");
         String sql = "DELETE FROM LIKES WHERE user_id = ? AND film_id = ?";
         jdbcTemplate.update(sql, userId, id);
     }
 
-    private boolean isUserExists(Long id) {
-        String sql = "SELECT * FROM USERS WHERE user_id = ?";
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, id);
-        return userRows.next();
-    }
-    private boolean isFilmExists(Long id) {
-        String sql = "SELECT * FROM FILMS WHERE film_id = ?";
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, id);
+    private boolean isLikeExist(Long userId, Long filmId) {
+        String sql = "SELECT * FROM LIKES WHERE user_id = ? AND film_id = ?";
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, userId, filmId);
         return userRows.next();
     }
 
@@ -59,32 +68,10 @@ public class LikesStorage {
                 rs.getString("description"),
                 rs.getDate("releaseDate").toLocalDate(),
                 rs.getInt("duration"),
-                getFilmGenres(rs.getLong("film_id")),
-                getMpa(rs.getInt("rate_id")),
+                genreStorage.getFilmGenres(rs.getLong("film_id")),
+                mpaStorage.getMpa(rs.getInt("rate_id")),
                 rs.getLong("rating")
         ), count);
-        System.out.println(films);
         return films;
-    }
-    private List<Genre> getFilmGenres(Long filmId) {
-        String sql = "SELECT GENRES.GENRE_ID, GENRE FROM FILM_GENRES JOIN GENRES " +
-                "ON FILM_GENRES.GENRE_ID = GENRES.GENRE_ID " +
-                "WHERE FILM_ID = ?";
-        List <Genre> genres = jdbcTemplate.query(sql, (rs, rowNum) -> new Genre(
-                        rs.getInt("genre_id"),
-                        rs.getString("genre")),
-                filmId
-        );
-        if (genres.size() == 0) genres = null;
-        return genres;
-    }
-    private Mpa getMpa(int mpaId) {
-        String sql = "SELECT MPA_NAME FROM RATES_MPA WHERE MPA_ID = ?";
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, mpaId);
-        if (userRows.next()) {
-            return new Mpa(mpaId,
-                    userRows.getString("mpa_name"));
-        }
-        else return null;
     }
 }

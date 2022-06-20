@@ -15,8 +15,8 @@ public class Film {
     @NotBlank @Size(max = 200) private String description;
     @NotNull @Past private LocalDate releaseDate;
     @NotNull @Positive private int duration;
-    private Set<Long> likes = new HashSet<>();
-    private List<Genre> genres;
+    private Set<Long> likes = new TreeSet<>();
+    private Set<Genre> genres;
     @NotNull private Mpa mpa;
     private Long rating;
 
@@ -30,7 +30,7 @@ public class Film {
     }
 
     public Film(Long id, String name, String description, LocalDate releaseDate, int duration,
-                List<Genre> genres, Mpa mpa) {
+                Set<Genre> genres, Mpa mpa) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -40,7 +40,7 @@ public class Film {
         this.mpa = mpa;
     }
 
-    public Film(Long id, String name, String description, LocalDate releaseDate, int duration, List<Genre> genres,
+    public Film(Long id, String name, String description, LocalDate releaseDate, int duration, Set<Genre> genres,
                 Mpa mpa, Long rating) {
         this.id = id;
         this.name = name;

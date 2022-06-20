@@ -1,12 +1,10 @@
 package ru.yandex.practicum.filmorate;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
@@ -30,8 +28,8 @@ class FilmorateApplicationTests {
 	public void testFindUserById() {
 		User user = new User(null, "mail@mail.ru", "dolore", "Nick Name",
 				LocalDate.of(1946, 8, 20));
-		Long id = userDbStorage.addUser(user).getId();
-		Optional<User> userOptional = userDbStorage.getUserById(id);
+		Long id = userDbStorage.add(user).getId();
+		Optional<User> userOptional = userDbStorage.getById(id);
 
 		assertThat(userOptional)
 				.isPresent()
@@ -46,10 +44,10 @@ class FilmorateApplicationTests {
 				LocalDate.of(1946, 8, 20));
 		User userUpdate = new User(null, "mail@mail.ru", "NewDolore", "Nick Name",
 				LocalDate.of(1946, 8, 20));
-		Long id = userDbStorage.addUser(user).getId();
+		Long id = userDbStorage.add(user).getId();
 		userUpdate.setId(id);
-		userDbStorage.updateUser(userUpdate);
-		Optional<User> userOptional = userDbStorage.getUserById(id);
+		userDbStorage.update(userUpdate);
+		Optional<User> userOptional = userDbStorage.getById(id);
 
 		assertThat(userOptional)
 				.isPresent()
@@ -61,9 +59,9 @@ class FilmorateApplicationTests {
 	public void testUserDelete() {
 		User user = new User(null, "mail@mail.ru", "dolore", "Nick Name",
 				LocalDate.of(1946, 8, 20));
-		userDbStorage.addUser(user);
-		userDbStorage.deleteUser(user);
-		Optional<User> userOptional = userDbStorage.getUserById(1L);
+		userDbStorage.add(user);
+		userDbStorage.delete(user);
+		Optional<User> userOptional = userDbStorage.getById(1L);
 		assertThat(userOptional).isEmpty();
 	}
 
@@ -73,8 +71,8 @@ class FilmorateApplicationTests {
 				LocalDate.of(1975, 5, 17),
 				100);
 		film.setMpa(new Mpa(1, null));
-		Long id = filmDbStorage.addFilm(film).getId();
-		Optional<Film> filmOptional = filmDbStorage.getFilmById(id);
+		Long id = filmDbStorage.add(film).getId();
+		Optional<Film> filmOptional = filmDbStorage.getById(id);
 
 		assertThat(filmOptional)
 				.isPresent()
@@ -84,7 +82,7 @@ class FilmorateApplicationTests {
 	}
 
 	@Test
-	public void testFilmUpdate() {
+	public void testUpdate() {
 		Film film = new Film(null, "name", "description",
 				LocalDate.of(1975, 5, 17),
 				100);
@@ -93,10 +91,10 @@ class FilmorateApplicationTests {
 				LocalDate.of(1975, 5, 17),
 				100);
 		filmUpdate.setMpa(new Mpa(1, null));
-		Long id = filmDbStorage.addFilm(film).getId();
+		Long id = filmDbStorage.add(film).getId();
 		filmUpdate.setId(id);
-		filmDbStorage.updateFilm(filmUpdate);
-		Optional<Film> filmOptional = filmDbStorage.getFilmById(id);
+		filmDbStorage.update(filmUpdate);
+		Optional<Film> filmOptional = filmDbStorage.getById(id);
 
 		assertThat(filmOptional)
 				.isPresent()
@@ -110,9 +108,9 @@ class FilmorateApplicationTests {
 				LocalDate.of(1975, 5, 17),
 				100);
 		film.setMpa(new Mpa(1, null));
-		filmDbStorage.addFilm(film);
-		filmDbStorage.deleteFilm(film);
-		Optional<Film> filmOptional = filmDbStorage.getFilmById(1L);
+		filmDbStorage.add(film);
+		filmDbStorage.delete(film);
+		Optional<Film> filmOptional = filmDbStorage.getById(1L);
 		assertThat(filmOptional).isEmpty();
 	}
 

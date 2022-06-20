@@ -16,14 +16,14 @@ public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
 
     @Override
-    public User addUser(User user) {
+    public User add(User user) {
         users.put(user.getId(), user);
         log.info("New user added: {}", user);
         return user;
     }
 
     @Override
-    public User updateUser(User user) {
+    public User update(User user) {
         Long id = user.getId();
         if (!users.containsKey(id))
             throw new UserNotFoundException(String.format("Attempt to update user with " +
@@ -34,19 +34,19 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Collection<User> getUsers() {
+    public Collection<User> getAll() {
         return users.values();
     }
 
     @Override
-    public User deleteUser(User user) {
+    public User delete(User user) {
         if (users.containsKey(user.getId())) return users.remove(user.getId());
         else throw new UserNotFoundException(String.format("Attempt to delete user with " +
                 "absent id = %d", user.getId()));
     }
 
     @Override
-    public Optional<User> getUserById(Long id) {
+    public Optional<User> getById(Long id) {
         return Optional.of(users.get(id));
     }
 }

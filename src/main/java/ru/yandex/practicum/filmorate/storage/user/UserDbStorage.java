@@ -21,7 +21,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User addUser(User user) {
+    public User add(User user) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("USERS")
                 .usingGeneratedKeyColumns("user_id");
@@ -31,7 +31,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User updateUser(User user) {
+    public User update(User user) {
         if (isUserExists(user.getId())) {
             String sqlQuery = "UPDATE USERS SET " +
                     "email = ?, login = ?, name = ?, birthday = ? " +
@@ -51,7 +51,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Collection<User> getUsers() {
+    public Collection<User> getAll() {
         String sql = "SELECT * FROM USERS ";
         return jdbcTemplate.query(sql, (rs, rowNum) -> new User(
                 rs.getLong("user_id"),
@@ -63,7 +63,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User deleteUser(User user) {
+    public User delete(User user) {
         if (isUserExists(user.getId())) {
             String sql = "DELETE FROM USERS WHERE user_id = ?";
             jdbcTemplate.update(sql, user.getId());
@@ -73,7 +73,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Optional<User> getUserById(Long id) {
+    public Optional<User> getById(Long id) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM USERS WHERE user_id = ?", id);
         if (userRows.first()) {
             User user = new User(
@@ -90,7 +90,7 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
-    private boolean isUserExists(Long id) {
+    public boolean isUserExists(Long id) {
         String sql = "SELECT * FROM USERS WHERE user_id = ?";
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, id);
         return userRows.first();

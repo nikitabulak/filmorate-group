@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.storage.like.LikesStorage;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -40,25 +41,25 @@ public class FilmService {
         if (film.getReleaseDate().isBefore(releaseDate))
             throw new ValidationException("Attempt to add film " +
                     "with releaseDate before 28-12-1895");
-        filmStorage.addFilm(film);
+        filmStorage.add(film);
         return film;
     }
 
     public Film updateFilm(Film film) {
-        filmStorage.updateFilm(film);
-        Film filmReturn = filmStorage.getFilmById(film.getId()).orElseThrow(
+        filmStorage.update(film);
+        Film filmReturn = filmStorage.getById(film.getId()).orElseThrow(
                 () ->  new FilmNotFoundException(String.format("Request film with absent id = %d", id)));
         if (film.getGenres() == null) filmReturn.setGenres(null);
-        else if (film.getGenres().isEmpty()) filmReturn.setGenres(new ArrayList<Genre>());
+        else if (film.getGenres().isEmpty()) filmReturn.setGenres(new HashSet<>());
         return filmReturn;
     }
 
     public Collection<Film> getFilms() {
-        return filmStorage.getFilms();
+        return filmStorage.getAll();
     }
 
     public Film getFilmById(Long id) {
-        return filmStorage.getFilmById(id)
+        return filmStorage.getById(id)
                 .orElseThrow(() ->  new FilmNotFoundException(String.format("Request film with absent id = %d", id)));
     }
 

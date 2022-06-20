@@ -6,9 +6,9 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface FilmStorage {
-    Film addFilm (Film film);
-    Film updateFilm (Film film);
-    Collection<Film> getFilms();
-    Optional<Film> getFilmById(Long id);
-    Film deleteFilm(Film film);
+    Film add(Film film);
+    Film update(Film film);
+    Collection<Film> getAll();
+    Optional<Film> getById(Long id);
+    Film delete(Film film);
 }

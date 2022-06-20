@@ -16,14 +16,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
 
     @Override
-    public Film addFilm(Film film) {
+    public Film add(Film film) {
         films.put(film.getId(), film);
         log.info("New film added: {}", film);
         return film;
     }
 
     @Override
-    public Film updateFilm(Film film) {
+    public Film update(Film film) {
         Long id = film.getId();
         if (!films.containsKey(id))
             throw new FilmNotFoundException(String.format("Attempt to update film with absent id = %d", id));
@@ -33,17 +33,17 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getFilms() {
+    public Collection<Film> getAll() {
         return films.values();
     }
 
     @Override
-    public Optional<Film> getFilmById(Long id) {
+    public Optional<Film> getById(Long id) {
         return Optional.of(films.get(id));
     }
 
     @Override
-    public Film deleteFilm(Film film) {
+    public Film delete(Film film) {
         if (films.containsKey(film.getId())) {
             log.info("Film {} was deleted", film);
             return films.remove(film.getId());
