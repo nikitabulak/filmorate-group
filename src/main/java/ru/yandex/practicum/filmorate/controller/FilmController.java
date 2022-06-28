@@ -63,7 +63,6 @@ public class FilmController {
     public Collection<Film> popularFilms(@RequestParam(required = false) Integer count) {
         log.info("Request best films, count = {}", count);
         if (count == null) count = 10;
-        System.out.println(count);
         return filmService.getFilmsByRating(count);
     }
 }

@@ -2,17 +2,14 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikesStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -27,7 +24,7 @@ public class FilmService {
     private static final LocalDate releaseDate = LocalDate.of(1895, 12, 28);
 
     @Autowired
-    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
+    public FilmService /*(@Qualifier("filmDbStorage")*/ (FilmStorage filmStorage,
                        LikesStorage likesStorage) {
         this.filmStorage = filmStorage;
         this.likesStorage = likesStorage;

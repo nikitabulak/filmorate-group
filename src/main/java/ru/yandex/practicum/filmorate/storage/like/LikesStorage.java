@@ -61,7 +61,6 @@ public class LikesStorage {
                "COUNT(L.USER_ID) as RATING FROM FILMS LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
                "GROUP BY FILMS.FILM_ID " +
                "ORDER BY RATING DESC LIMIT ?";
-        System.out.println(count);
         List <Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
                 rs.getLong("film_id"),
                 rs.getString("name"),
@@ -70,8 +69,8 @@ public class LikesStorage {
                 rs.getInt("duration"),
                 genreStorage.getFilmGenres(rs.getLong("film_id")),
                 mpaStorage.getMpa(rs.getInt("rate_id")),
-                rs.getLong("rating")
-        ), count);
+                rs.getLong("rating")),
+         count);
         return films;
     }
 }

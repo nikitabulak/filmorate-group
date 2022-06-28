@@ -20,7 +20,7 @@ public class UserService {
     private Long id = 0L;
 
     @Autowired
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, FriendsStorage friendsStorage) {
+    public UserService(/*@Qualifier("userDbStorage")*/ UserStorage userStorage, FriendsStorage friendsStorage) {
         this.userStorage = userStorage;
         this.friendsStorage = friendsStorage;
     }

@@ -26,13 +26,16 @@ public class GenreStorage {
         ));
     }
 
-    public void updateGenresOfFilm(Film film) {
-        jdbcTemplate.update("DELETE FROM FILM_GENRES WHERE film_id = ?", film.getId());
+    public void addGenresOfFilm(Film film) {
         if (film.getGenres() != null) {
             for (Genre genre : film.getGenres()) {
                 jdbcTemplate.update("INSERT INTO FILM_GENRES (film_id, genre_id) VALUES (?, ?)",
                         film.getId(), genre.getId());
             }
         }
+    }
+
+    public void deleteGenresOfFilm(Film film) {
+        jdbcTemplate.update("DELETE FROM FILM_GENRES WHERE film_id = ?", film.getId());
     }
 }
