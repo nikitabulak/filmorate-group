@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.friends.FriendsStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -66,13 +67,9 @@ public class UserService {
                 .filter(x -> findFriends(otherId).contains(x))
                 .collect(Collectors.toList());
 
-        /*User user = userStorage.getUserById(id);
-        User otherUser = userStorage.getUserById(otherId);
-        List<Long> idUsers = userStorage.getUsers().stream().map(User::getId).collect(Collectors.toList());
-        return user.getFriends().stream()
-                .filter(x -> otherUser.getFriends().contains(x))
-                .filter(idUsers::contains)
-                .map(userStorage::getUserById)
-                .collect(Collectors.toList()); */
+    }
+
+    public Collection<Event> getFeed(Long id) {
+        return null;
     }
 }

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -68,5 +69,11 @@ public class UserController {
     public Collection<User> sharedFriends(@PathVariable Long id, @PathVariable Long otherId) {
         log.info("Request from user id = {} to get shared friends with user id = {}", id, otherId);
         return userService.findSharedFriends(id, otherId);
+    }
+
+    @GetMapping("{id}/feed")
+    public Collection<Event> getFeed(@PathVariable Long id) {
+        log.info("Request feed user id = {}", id);
+        return userService.getFeed(id);
     }
 }
