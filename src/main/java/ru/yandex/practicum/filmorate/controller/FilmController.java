@@ -60,10 +60,14 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<Film> popularFilms(@RequestParam(required = false) Integer count) {
-        log.info("Request best films, count = {}", count);
+    public Collection<Film> popularFilms(@RequestParam(required = false) Integer count, Integer genreId, Integer year) {
+        log.info("Request best films, count = {}, genreId = {}, year = {}", count, genreId, year);
         if (count == null) count = 10;
+        if (genreId == null) genreId = -1;
+        if (year == null) year = -1;
         System.out.println(count);
-        return filmService.getFilmsByRating(count);
+        return filmService.getFilmsByRating(count, genreId, year);
     }
+
+
 }

@@ -56,12 +56,46 @@ public class LikesStorage {
         return userRows.next();
     }
 
-    public List<Film> getPopular(int count) {
-       String sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
-               "COUNT(L.USER_ID) as RATING FROM FILMS LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
-               "GROUP BY FILMS.FILM_ID " +
-               "ORDER BY RATING DESC LIMIT ?";
-        System.out.println(count);
+    public List<Film> getPopular(int count, int genreId, int year) {
+        String sql = "";
+        if (genreId == -1 && year == -1) {
+            sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
+                    "COUNT(L.USER_ID) as RATING FROM FILMS LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
+                    "GROUP BY FILMS.FILM_ID " +
+                    "ORDER BY RATING DESC LIMIT ?";
+        }
+        if (genreId >0 && year == -1 ){
+            System.out.println("Фильтрация жанру");
+            sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
+                    "COUNT(L.USER_ID) as RATING FROM FILMS LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
+                    "LEFT JOIN FILM_GENRES F on FILMS.FILM_ID = F.FILM_ID " +
+                    "WHERE F.GENRE_ID="+ genreId +
+                    " GROUP BY FILMS.FILM_ID,  F.GENRE_ID " +
+                    "ORDER BY RATING DESC LIMIT ?";
+        }
+        if (genreId == -1 && year >0){
+            sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
+                    "COUNT(L.USER_ID) as RATING FROM FILMS LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
+                    "WHERE EXTRACT(YEAR FROM RELEASEDATE)="+ year +
+                    " GROUP BY FILMS.FILM_ID" +
+                    " ORDER BY RATING DESC LIMIT ?";
+        }
+        if (genreId >0 && year >0){
+            sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
+                    "COUNT(L.USER_ID) as RATING FROM FILMS LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
+                    "LEFT JOIN FILM_GENRES F on FILMS.FILM_ID = F.FILM_ID " +
+                    "WHERE F.GENRE_ID="+ genreId + " AND EXTRACT(YEAR FROM RELEASEDATE)="+ year +
+                    " GROUP BY FILMS.FILM_ID,  F.GENRE_ID " +
+                    "ORDER BY RATING DESC LIMIT ?";
+        }
+
+
+
+
+        System.out.println("count = " + count);
+        System.out.println("genreId = " + genreId);
+        System.out.println("year = " + year);
+
         List <Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
                 rs.getLong("film_id"),
                 rs.getString("name"),
