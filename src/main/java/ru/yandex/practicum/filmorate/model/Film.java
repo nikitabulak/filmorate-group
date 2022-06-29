@@ -13,12 +13,15 @@ public class Film {
     private Long id;
     @NotBlank private String name;
     @NotBlank @Size(max = 200) private String description;
-    @NotNull @Past private LocalDate releaseDate;
+    @NotNull
+//    @Past                                         //insert from Oleg Sharomov
+    private LocalDate releaseDate;
     @NotNull @Positive private int duration;
     private Set<Long> likes = new TreeSet<>();
     private Set<Genre> genres;
     @NotNull private Mpa mpa;
     private Long rating;
+    private Set<Director> directors;                //insert from Oleg Sharomov
 
 
     public Film(Long id, String name, String description, LocalDate releaseDate, int duration) {
@@ -51,6 +54,20 @@ public class Film {
         this.mpa = mpa;
         this.rating = rating;
     }
+    //  the insert is made by Oleg Sharomov>>
+    public Film(Long id, String name, String description, LocalDate releaseDate, int duration, Set<Genre> genres,
+                Mpa mpa, Set<Director> directors) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.genres = genres;
+        this.mpa = mpa;
+        this.rating = rating;
+        this.directors = directors;
+    }
+    //  <<the end of the insert from Oleg Sharomov
 
     public int getRating(){
         return likes.size();

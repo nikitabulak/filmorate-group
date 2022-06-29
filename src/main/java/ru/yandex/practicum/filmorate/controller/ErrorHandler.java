@@ -64,4 +64,14 @@ public class ErrorHandler {
                 e.getMessage()
         );
     }
+    //	the insert is made by Oleg Sharomov>>
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleDirectorNotFoundException(final DirectorNotFoundException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
+    //	<<the end of the insert from Oleg Sharomov
 }
