@@ -75,6 +75,12 @@ public class FilmController {
         return filmService.getFilmsByRating(count, genreId, year);
     }
 
+    @GetMapping("/common")
+    public Collection<Film> commonFilms(@RequestParam Long userId, Long friendId) {
+        log.info("Request common films of users with id {} and id {}", userId, friendId);
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
     //	the insert is made by Oleg Sharomov>>
     // GET /films/director/{directorId}?sortBy=year или /films/director/{directorId}?sortBy=likes
     @GetMapping("/director/{directorId}")
