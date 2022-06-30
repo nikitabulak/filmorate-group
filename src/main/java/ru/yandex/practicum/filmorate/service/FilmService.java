@@ -72,7 +72,8 @@ public class FilmService {
         log.info("User id = {} deleted like to film id = {}", userId, id);
     }
 
-    public List<Film> getFilmsByRating(int count) {
-        return likesStorage.getPopular(count);
+    public List<Film> getFilmsByRating(int count, int genreId, int year) {
+
+        return likesStorage.getPopular(count, genreId, year);
     }
 }

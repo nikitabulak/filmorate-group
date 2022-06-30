@@ -6,12 +6,14 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -56,22 +58,93 @@ public class LikesStorage {
         return userRows.next();
     }
 
-    public List<Film> getPopular(int count) {
-       String sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
-               "COUNT(L.USER_ID) as RATING FROM FILMS LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
-               "GROUP BY FILMS.FILM_ID " +
-               "ORDER BY RATING DESC LIMIT ?";
-        System.out.println(count);
-        List <Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
-                rs.getLong("film_id"),
-                rs.getString("name"),
-                rs.getString("description"),
-                rs.getDate("releaseDate").toLocalDate(),
-                rs.getInt("duration"),
-                genreStorage.getFilmGenres(rs.getLong("film_id")),
-                mpaStorage.getMpa(rs.getInt("rate_id")),
-                rs.getLong("rating")
-        ), count);
+    public List<Film> getPopular(int count, int genreId, int year) {
+        String sql = "";
+        List<Film> films = new ArrayList<>();
+        if (genreId == -1 && year == -1) {
+            log.info("Filtering populars films no parameters");
+            sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
+                    "COUNT(L.USER_ID) as RATING FROM FILMS " +
+                    "LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
+                    "GROUP BY FILMS.FILM_ID " +
+                    "ORDER BY RATING DESC LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
+                    rs.getLong("film_id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getDate("releaseDate").toLocalDate(),
+                    rs.getInt("duration"),
+                    genreStorage.getFilmGenres(rs.getLong("film_id")),
+                    mpaStorage.getMpa(rs.getInt("rate_id")),
+                    rs.getLong("rating")
+            ), count);
+
+        }
+        if (genreId > 0 && year == -1) {
+            log.info("Filtering populars films by genre");
+            sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
+                    "COUNT(L.USER_ID) as RATING FROM FILMS " +
+                    "LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
+                    "LEFT JOIN FILM_GENRES F on FILMS.FILM_ID = F.FILM_ID " +
+                    "WHERE F.GENRE_ID=?" +
+                    " GROUP BY FILMS.FILM_ID,  F.GENRE_ID " +
+                    "ORDER BY RATING DESC LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
+                    rs.getLong("film_id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getDate("releaseDate").toLocalDate(),
+                    rs.getInt("duration"),
+                    genreStorage.getFilmGenres(rs.getLong("film_id")),
+                    mpaStorage.getMpa(rs.getInt("rate_id")),
+                    rs.getLong("rating")
+            ), genreId, count);
+        }
+        if (genreId == -1 && year > 0) {
+            log.info("Filtering populars films by year");
+            sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
+                    "COUNT(L.USER_ID) as RATING FROM FILMS " +
+                    "LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
+                    "WHERE EXTRACT(YEAR FROM RELEASEDATE)=?" +
+                    " GROUP BY FILMS.FILM_ID" +
+                    " ORDER BY RATING DESC LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
+                    rs.getLong("film_id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getDate("releaseDate").toLocalDate(),
+                    rs.getInt("duration"),
+                    genreStorage.getFilmGenres(rs.getLong("film_id")),
+                    mpaStorage.getMpa(rs.getInt("rate_id")),
+                    rs.getLong("rating")
+            ), year, count);
+        }
+        if (genreId > 0 && year > 0) {
+            log.info("Filtering populars films by genre and year");
+            sql = "SELECT FILMS.FILM_ID, NAME, DESCRIPTION, RELEASEDATE, DURATION, RATE_ID , " +
+                    "COUNT(L.USER_ID) as RATING FROM FILMS " +
+                    "LEFT JOIN LIKES L on FILMS.FILM_ID = L.FILM_ID " +
+                    "LEFT JOIN FILM_GENRES F on FILMS.FILM_ID = F.FILM_ID " +
+                    "WHERE F.GENRE_ID=?" +
+                    " AND EXTRACT(YEAR FROM RELEASEDATE)=?" +
+                    " GROUP BY FILMS.FILM_ID,  F.GENRE_ID " +
+                    "ORDER BY RATING DESC LIMIT ?";
+            films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
+                    rs.getLong("film_id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getDate("releaseDate").toLocalDate(),
+                    rs.getInt("duration"),
+                    genreStorage.getFilmGenres(rs.getLong("film_id")),
+                    mpaStorage.getMpa(rs.getInt("rate_id")),
+                    rs.getLong("rating")
+            ), genreId, year, count);
+        }
+        if (genreId < -1 && year < -1) {
+            throw new ValidationException(String.format("Incorrect parameters for filtering populars - films" +
+                    " genreid = %d and year = %d.", genreId, year));
+        }
+
         return films;
     }
 }
