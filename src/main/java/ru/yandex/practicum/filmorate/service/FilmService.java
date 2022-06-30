@@ -7,12 +7,10 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikesStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -51,6 +49,7 @@ public class FilmService {
                 () ->  new FilmNotFoundException(String.format("Request film with absent id = %d", id)));
         if (film.getGenres() == null) filmReturn.setGenres(null);
         else if (film.getGenres().isEmpty()) filmReturn.setGenres(new HashSet<>());
+        if(film.getDirectors() == null){filmReturn.setDirectors(null);}             //	insert from Oleg Sharomov
         return filmReturn;
     }
 

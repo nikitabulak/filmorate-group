@@ -5,9 +5,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
@@ -22,13 +25,15 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private GenreStorage genreStorage;
     private MpaStorage mpaStorage;
+    private final DirectorStorage directorDao;                       //	insert from Oleg Sharomov
 
     public FilmDbStorage(JdbcTemplate jdbcTemplate,
                          GenreStorage genreStorage,
-                         MpaStorage mpaStorage) {
+                         MpaStorage mpaStorage, DirectorStorage directorDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.genreStorage = genreStorage;
         this.mpaStorage = mpaStorage;
+        this.directorDao = directorDao;
     }
 
     @Override
@@ -43,11 +48,24 @@ public class FilmDbStorage implements FilmStorage {
                         film.getId(), genre.getId());
             }
         }
-            jdbcTemplate.update("UPDATE FILMS SET RATE_ID = ? WHERE FILM_ID = ?",
-                    film.getMpa().getId(),
-                    film.getId()
-            );
-
+        //	the insert is made by Oleg Sharomov>>
+        if (film.getDirectors() != null) {
+            for (Director director : film.getDirectors()) { // если режиссер есть - добавляет их в FILM_DIRECTOR
+                if (directorDao.isDirectorExists(director.getId())) {  //проверка присутствия режиссера в DIRECTORS
+                    jdbcTemplate.update("INSERT INTO FILM_DIRECTOR (film_id, director_id) VALUES (?, ?)",
+                            film.getId(), director.getId());
+                } else {
+                    throw new DirectorNotFoundException(String.format("Attempt to create film with " +
+                            "absent director id = %d", director.getId()));
+                }
+            }
+        }
+        film.setDirectors(directorDao.getDirectorsByFilmId(film.getId()));
+        //	<<the end of the insert from Oleg Sharomov
+        jdbcTemplate.update("UPDATE FILMS SET RATE_ID = ? WHERE FILM_ID = ?",
+                film.getMpa().getId(),
+                film.getId()
+        );
         log.info("New film added: {}", film);
         return film;
     }
@@ -66,6 +84,7 @@ public class FilmDbStorage implements FilmStorage {
                     film.getMpa().getId(),
                     film.getId());
             genreStorage.updateGenresOfFilm(film);
+            directorDao.updateDirectorsOfFilm(film);            //	insert from Oleg Sharomov
             log.info("Film {} has been successfully updated", film);
             return film;
         } else {
@@ -84,7 +103,8 @@ public class FilmDbStorage implements FilmStorage {
                 rs.getDate("releaseDate").toLocalDate(),
                 rs.getInt("duration"),
                 genreStorage.getFilmGenres(rs.getLong("film_id")),
-                mpaStorage.getMpa(rs.getInt("rate_id"))
+                mpaStorage.getMpa(rs.getInt("rate_id")),
+                directorDao.getDirectorsByFilmId(rs.getLong("film_id"))    // insert from Oleg Sharomov
         ));
     }
 
@@ -105,6 +125,7 @@ public class FilmDbStorage implements FilmStorage {
             if (genres.size() != 0) {
                 film.setGenres(genreStorage.getFilmGenres(id));
             }
+            film.setDirectors(directorDao.getDirectorsByFilmId(id));        //	insert from Oleg Sharomov
             log.info("Found film id = {}", film);
             return Optional.of(film);
         } else {
