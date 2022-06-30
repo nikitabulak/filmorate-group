@@ -41,9 +41,11 @@ public class UserService {
         System.out.println(userStorage.getAll());
         return userStorage.getAll();
     }
-    public User deleteUser(User user) {
-        return userStorage.delete(user);
+
+    public void deleteUserById(Long id){
+        userStorage.deleteById(id);
     }
+
     public User getUserById(Long id) {
         return userStorage.getById(id).orElseThrow(() ->
                 new UserNotFoundException(String.format("Request user with absent id = %d", id)));

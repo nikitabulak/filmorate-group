@@ -109,7 +109,8 @@ class FilmorateApplicationTests {
 				100);
 		film.setMpa(new Mpa(1, null));
 		filmDbStorage.add(film);
-		filmDbStorage.delete(film);
+//		filmDbStorage.delete(film);
+		filmDbStorage.deleteById(film.getId());
 		Optional<Film> filmOptional = filmDbStorage.getById(1L);
 		assertThat(filmOptional).isEmpty();
 	}

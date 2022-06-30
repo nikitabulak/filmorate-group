@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotImplementedException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -135,12 +136,16 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film delete(Film film) {
-        if (isFilmExists(film.getId())) {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public void deleteById(Long filmId){
+        if (isFilmExists(filmId)) {
             String sql = "DELETE FROM FILMS WHERE film_id = ?";
-            jdbcTemplate.update(sql, film.getId());
-            return film;
+            jdbcTemplate.update(sql, filmId);
         } else throw new FilmNotFoundException(String.format("Attempt to delete film with " +
-                "absent id = %d", film.getId()));
+                "absent id = %d", filmId));
     }
 
     public boolean isFilmExists(Long id) {
