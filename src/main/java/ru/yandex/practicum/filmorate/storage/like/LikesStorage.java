@@ -149,14 +149,15 @@ public class LikesStorage {
     }
 
     public List<Film> getCommonFilms(Long userId, Long friendId) {
-        String sql =   "select * " +
-                "from films as f " +
-                "left join (SELECT film_id, COUNT(film_id) AS count_like FROM likes " +
-                "GROUP BY film_id) USING (film_id)" +
-                "right join likes as l1  on f.film_id=l1.film_id " +
-                "right join likes as l2 on l1.film_id=l2.film_id " +
-                "where l1.user_id = ? and l2.user_id=? " +
-                "order by count_like desc";
+        if (!userDbStorage.isUserExists(userId)) throw new UserNotFoundException("User not found");
+        if (!userDbStorage.isUserExists(friendId)) throw new UserNotFoundException("User not found");
+        String sql = "SELECT *" +
+                "FROM films AS f " +
+                "LEFT JOIN (SELECT film_id, COUNT(film_id) AS count_like FROM likes GROUP BY film_id) USING (film_id) " +
+                "RIGHT JOIN likes AS l1 ON f.film_id = l1.film_id " +
+                "RIGHT JOIN likes AS l2 ON l1.film_id = l2.film_id " +
+                "WHERE l1.user_id = ? AND l2.user_id = ? " +
+                "ORDER BY count_like DESC;";
 
         List <Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
                 rs.getLong("film_id"),

@@ -77,7 +77,7 @@ public class FilmService {
         return likesStorage.getPopular(count, genreId, year);
     }
 
-    public List<Film> getCommonFilms(Long userId, Long friendId) {
+    public List<Film> getCommonFilms(long userId, long friendId) {
         return likesStorage.getCommonFilms(userId,friendId);
     }
 }
