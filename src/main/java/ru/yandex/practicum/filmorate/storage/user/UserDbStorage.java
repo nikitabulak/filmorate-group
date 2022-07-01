@@ -100,7 +100,8 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User delete(User user) {
-        throw new NotImplementedException();
+        deleteById(user.getId());
+        return user;
     }
 }
 

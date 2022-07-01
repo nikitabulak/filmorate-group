@@ -151,6 +151,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film delete(Film film) {
-        throw new NotImplementedException();
+        deleteById(film.getId());
+        return film;
     }
 }
