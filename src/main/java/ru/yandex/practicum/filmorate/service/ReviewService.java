@@ -15,7 +15,6 @@ public class ReviewService {
 
     private final ReviewStorage reviewStorage;
     private final ReviewRatingsDao reviewRatingsDao;
-    private Long id = 0L;
 
     public ReviewService(ReviewStorage reviewStorage, ReviewRatingsDao reviewRatingsDao){
         this.reviewStorage = reviewStorage;
