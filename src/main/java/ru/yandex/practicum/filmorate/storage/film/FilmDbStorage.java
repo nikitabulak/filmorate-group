@@ -135,11 +135,6 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film delete(Film film) {
-        throw new NotImplementedException();
-    }
-
-    @Override
     public void deleteById(Long filmId){
         if (isFilmExists(filmId)) {
             String sql = "DELETE FROM FILMS WHERE film_id = ?";
@@ -152,5 +147,10 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "SELECT * FROM FILMS WHERE film_id = ?";
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, id);
         return userRows.next();
+    }
+
+    @Override
+    public Film delete(Film film) {
+        throw new NotImplementedException();
     }
 }

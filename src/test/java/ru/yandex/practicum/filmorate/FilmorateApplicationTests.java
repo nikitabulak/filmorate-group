@@ -60,7 +60,7 @@ class FilmorateApplicationTests {
 		User user = new User(null, "mail@mail.ru", "dolore", "Nick Name",
 				LocalDate.of(1946, 8, 20));
 		userDbStorage.add(user);
-		userDbStorage.delete(user);
+		userDbStorage.deleteById(user.getId());
 		Optional<User> userOptional = userDbStorage.getById(1L);
 		assertThat(userOptional).isEmpty();
 	}
@@ -109,7 +109,6 @@ class FilmorateApplicationTests {
 				100);
 		film.setMpa(new Mpa(1, null));
 		filmDbStorage.add(film);
-//		filmDbStorage.delete(film);
 		filmDbStorage.deleteById(film.getId());
 		Optional<Film> filmOptional = filmDbStorage.getById(1L);
 		assertThat(filmOptional).isEmpty();

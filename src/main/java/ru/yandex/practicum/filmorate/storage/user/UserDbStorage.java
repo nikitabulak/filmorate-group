@@ -64,11 +64,6 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User delete(User user) {
-        throw new NotImplementedException();
-    }
-
-    @Override
     public void deleteById(Long userId) {
         if (isUserExists(userId)) {
             String sql = "DELETE FROM USERS WHERE user_id = ?";
@@ -101,6 +96,11 @@ public class UserDbStorage implements UserStorage {
         String sql = "SELECT * FROM USERS WHERE user_id = ?";
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, id);
         return userRows.first();
+    }
+
+    @Override
+    public User delete(User user) {
+        throw new NotImplementedException();
     }
 }
 
