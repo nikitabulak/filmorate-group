@@ -89,25 +89,25 @@ public class FilmService {
             return getFilmsByRating(count, genreId, year);
         } else {
             if (by != null) {
-                String[] words = by.split(",");
+                String[] words = by.toLowerCase().replaceAll(" ", "").split(",");
                 if (words.length == 1 && words[0].equals("title")) {
                     List<Film> films = filmStorage.searchByTitle(query);
-                    return changGenresByNull(films);
+                    return replaceGenresByNull(films);
                 }
 
                 if (words.length == 1 && words[0].equals("director")) {
                     List<Film> films = filmStorage.searchByDirector(query);
-                    return changGenresByNull(films);
+                    return replaceGenresByNull(films);
                 } else if (words.length > 1) {
                     if ((words[0].equals("director") && words[1].equals("title"))) {
                         List<Film> all = new ArrayList<>(filmStorage.searchByTitle(query));
-                        all.addAll(changGenresByNull(filmStorage.searchByDirector(query)));
+                        all.addAll(replaceGenresByNull(filmStorage.searchByDirector(query)));
                         return all;
                     }
 
                     if ((words[0].equals("title") && words[1].equals("director"))) {
                         List<Film> all = new ArrayList<>(filmStorage.searchByDirector(query));
-                        all.addAll(changGenresByNull(filmStorage.searchByTitle(query)));
+                        all.addAll(replaceGenresByNull(filmStorage.searchByTitle(query)));
                         return all;
                     }
 
@@ -121,7 +121,7 @@ public class FilmService {
         }
     }
 
-    private List<Film> changGenresByNull(List<Film> films) {
+    private List<Film> replaceGenresByNull(List<Film> films) {
         return films.stream().peek(film -> {
                     if (film.getGenres().size() == 0) film.setGenres(null);
                 })
