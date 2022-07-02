@@ -147,6 +147,7 @@ public class FilmDbStorage implements FilmStorage {
         return userRows.next();
     }
 
+    @Override
     public List<Film> searchByTitle(String query) {
         String str = "%" + query + "%";
         String sql = "SELECT * FROM FILMS WHERE LOWER(NAME) LIKE LOWER(?)";
@@ -162,6 +163,7 @@ public class FilmDbStorage implements FilmStorage {
         ), str);
     }
 
+    @Override
     public List<Film> searchByDirector(String query) {
         String str = "%" + query + "%";
         String sql = "select * from FILMS\n" +

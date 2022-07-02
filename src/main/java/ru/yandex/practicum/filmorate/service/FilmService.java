@@ -82,29 +82,32 @@ public class FilmService {
     }
 
     public List<Film> search(String query, String by) {
+        int count = 10;
+        int genreId = -1;
+        int year = -1;
         if (query == null) {
-            return getFilmsByRating(10, -1, -1);
+            return getFilmsByRating(count, genreId, year);
         } else {
             if (by != null) {
                 String[] words = by.split(",");
                 if (words.length == 1 && words[0].equals("title")) {
                     List<Film> films = filmStorage.searchByTitle(query);
-                    return chengGenresByNull(films);
+                    return changGenresByNull(films);
                 }
 
                 if (words.length == 1 && words[0].equals("director")) {
                     List<Film> films = filmStorage.searchByDirector(query);
-                    return chengGenresByNull(films);
+                    return changGenresByNull(films);
                 } else if (words.length > 1) {
                     if ((words[0].equals("director") && words[1].equals("title"))) {
                         List<Film> all = new ArrayList<>(filmStorage.searchByTitle(query));
-                        all.addAll(chengGenresByNull(filmStorage.searchByDirector(query)));
+                        all.addAll(changGenresByNull(filmStorage.searchByDirector(query)));
                         return all;
                     }
 
                     if ((words[0].equals("title") && words[1].equals("director"))) {
                         List<Film> all = new ArrayList<>(filmStorage.searchByDirector(query));
-                        all.addAll(chengGenresByNull(filmStorage.searchByTitle(query)));
+                        all.addAll(changGenresByNull(filmStorage.searchByTitle(query)));
                         return all;
                     }
 
@@ -118,8 +121,10 @@ public class FilmService {
         }
     }
 
-    private List<Film> chengGenresByNull(List<Film> films){
-        return films.stream().peek(film -> {if (film.getGenres().size()==0) film.setGenres(null);})
+    private List<Film> changGenresByNull(List<Film> films) {
+        return films.stream().peek(film -> {
+                    if (film.getGenres().size() == 0) film.setGenres(null);
+                })
                 .collect(Collectors.toList());
     }
 }
