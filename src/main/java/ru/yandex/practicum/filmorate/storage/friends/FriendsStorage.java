@@ -17,7 +17,8 @@ public class FriendsStorage {
     public FriendsStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
-    public void addFriend (Long id, Long friendId) {
+
+    public void addFriend(Long id, Long friendId) {
         if (isUserExists(id) && isUserExists(friendId)) {
             String sql = "INSERT INTO FRIENDSHIPS (user_id, friend_id, is_approved) VALUES (?, ?, ?)";
             jdbcTemplate.update(sql, id, friendId, false);
@@ -29,14 +30,18 @@ public class FriendsStorage {
         String sql = "SELECT FRIEND_ID, EMAIL, LOGIN, NAME, BIRTHDAY FROM FRIENDSHIPS JOIN USERS U " +
                 "on FRIENDSHIPS.FRIEND_ID = U.USER_ID WHERE " +
                 "FRIENDSHIPS.USER_ID = ?";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new User(
-                rs.getLong("friend_id"),
-                rs.getString("email"),
-                rs.getString("login"),
-                rs.getString("name"),
-                rs.getDate("birthday").toLocalDate()),
-                id
-        );
+        if (isUserExists(id)) {
+            return jdbcTemplate.query(sql, (rs, rowNum) -> new User(
+                            rs.getLong("friend_id"),
+                            rs.getString("email"),
+                            rs.getString("login"),
+                            rs.getString("name"),
+                            rs.getDate("birthday").toLocalDate()),
+                    id
+            );
+        } else {
+            throw new UserNotFoundException(String.format("Request to find friends of user with absent id = %d", id));
+        }
     }
 
     private boolean isUserExists(Long id) {
@@ -49,7 +54,7 @@ public class FriendsStorage {
         if (isUserExists(id) && isUserExists(friendId)) {
             String sql = "DELETE FROM FRIENDSHIPS WHERE user_id = ? AND friend_id = ?";
             jdbcTemplate.update(sql, id, friendId);
-        }  else throw new UserNotFoundException("Attempt to delete unknown user to friends");
+        } else throw new UserNotFoundException("Attempt to delete unknown user to friends");
     }
 }
 

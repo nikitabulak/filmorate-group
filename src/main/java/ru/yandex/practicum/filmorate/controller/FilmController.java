@@ -53,6 +53,12 @@ public class FilmController {
         return filmService.updateFilm(film);
     }
 
+    @DeleteMapping("/{id}")
+    public void deleteFilmById(@PathVariable Long id){
+        log.info("Request to delete film by id = {}", id);
+        filmService.deleteFilmById(id);
+    }
+
     @PutMapping("/{id}/like/{userId}")
     public void likeFilm(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Request from user id = {} put like to film id = {}", userId, id);
@@ -73,6 +79,12 @@ public class FilmController {
         if (year == null) year = -1;
         System.out.println(count);
         return filmService.getFilmsByRating(count, genreId, year);
+    }
+
+    @GetMapping("/common")
+    public Collection<Film> commonFilms(@RequestParam Long userId, Long friendId) {
+        log.info("Request common films of users with id {} and id {}", userId, friendId);
+        return filmService.getCommonFilms(userId, friendId);
     }
 
     //	the insert is made by Oleg Sharomov>>

@@ -66,6 +66,10 @@ public class FilmService {
                 .orElseThrow(() -> new FilmNotFoundException(String.format("Request film with absent id = %d", id)));
     }
 
+    public void deleteFilmById(Long id){
+        filmStorage.deleteById(id);
+    }
+
     public void addLike(Long id, Long userId) {
         likesStorage.addLike(id, userId);
         log.info("User id = {} set like film id = {}", userId, id);
@@ -80,6 +84,7 @@ public class FilmService {
 
         return likesStorage.getPopular(count, genreId, year);
     }
+
 
     public List<Film> search(String query, String by) {
         int count = 10;
@@ -126,5 +131,9 @@ public class FilmService {
                     if (film.getGenres().size() == 0) film.setGenres(null);
                 })
                 .collect(Collectors.toList());
+}
+    public List<Film> getCommonFilms(long userId, long friendId) {
+        return likesStorage.getCommonFilms(userId,friendId);
+
     }
 }

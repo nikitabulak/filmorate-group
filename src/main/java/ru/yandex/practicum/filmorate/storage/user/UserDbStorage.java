@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotImplementedException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -63,13 +64,14 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User delete(User user) {
-        if (isUserExists(user.getId())) {
+    public void deleteById(Long userId) {
+        if (isUserExists(userId)) {
             String sql = "DELETE FROM USERS WHERE user_id = ?";
-            jdbcTemplate.update(sql, user.getId());
-            return user;
-        } else throw new UserNotFoundException(String.format("Attempt to delete user with " +
-                "absent id = %d", user.getId()));
+            jdbcTemplate.update(sql, userId);
+        } else {
+            throw new UserNotFoundException(String.format("Attempt to delete user with " +
+                    "absent id = %d", userId));
+        }
     }
 
     @Override
@@ -94,6 +96,12 @@ public class UserDbStorage implements UserStorage {
         String sql = "SELECT * FROM USERS WHERE user_id = ?";
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, id);
         return userRows.first();
+    }
+
+    @Override
+    public User delete(User user) {
+        deleteById(user.getId());
+        return user;
     }
 }
 

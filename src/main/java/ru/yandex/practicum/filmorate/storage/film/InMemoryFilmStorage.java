@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotImplementedException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
@@ -49,12 +50,17 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+
     public List<Film> searchByTitle(String query) {
-        return null;
+        throw new NotImplementedException();
     }
 
     @Override
     public List<Film> searchByDirector(String query) {
-        return null;
+        throw new NotImplementedException();
+}
+    public void deleteById(Long id){
+        throw new NotImplementedException();
+
     }
 }

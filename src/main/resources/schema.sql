@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS FILMS, FILM_GENRES, FRIENDSHIPS, LIKES, USERS, FILM_DIRECTOR, RATES_MPA, GENRES,
-    DIRECTORS, REVIEWS, EVENTS;
+    DIRECTORS, REVIEWS, REVIEW_RATINGS, EVENTS;
 
 CREATE TABLE IF NOT EXISTS RATES_MPA
 (
@@ -34,21 +34,24 @@ CREATE TABLE IF NOT EXISTS FILMS
 
 CREATE TABLE IF NOT EXISTS FILM_GENRES
 (
-    film_id  bigint REFERENCES FILMS (film_id),
-    genre_id int REFERENCES GENRES (genre_id)
+    film_id  bigint REFERENCES FILMS (film_id) ON DELETE CASCADE,
+    genre_id int REFERENCES GENRES (genre_id),
+    CONSTRAINT film_genres_pk PRIMARY KEY (film_id, genre_id)
 );
 
 CREATE TABLE IF NOT EXISTS LIKES
 (
-    user_id bigint REFERENCES USERS (user_id),
-    film_id bigint REFERENCES FILMS (film_id)
+    user_id bigint REFERENCES USERS (user_id) ON DELETE CASCADE,
+    film_id bigint REFERENCES FILMS (film_id) ON DELETE CASCADE,
+    CONSTRAINT likes_pk PRIMARY KEY (user_id, film_id)
 );
 
 CREATE TABLE IF NOT EXISTS FRIENDSHIPS
 (
-    user_id     bigint REFERENCES USERS (user_id),
-    friend_id   bigint REFERENCES USERS (user_id),
-    is_approved boolean
+    user_id     bigint REFERENCES USERS (user_id) ON DELETE CASCADE,
+    friend_id   bigint REFERENCES USERS (user_id) ON DELETE CASCADE,
+    is_approved boolean,
+    CONSTRAINT friendships_pk PRIMARY KEY (user_id, friend_id)
 );
 
 CREATE TABLE IF NOT EXISTS REVIEWS
@@ -58,7 +61,15 @@ CREATE TABLE IF NOT EXISTS REVIEWS
     is_positive boolean,
     user_id     bigint REFERENCES USERS (user_id) ON DELETE CASCADE,
     film_id     bigint REFERENCES FILMS (film_id) ON DELETE CASCADE,
-    usefulness  bigint
+    useful  bigint
+);
+
+CREATE TABLE IF NOT EXISTS REVIEW_RATINGS
+(
+    review_id bigint REFERENCES REVIEWS (review_id) ON DELETE CASCADE,
+    user_id bigint REFERENCES USERS (user_id) ON DELETE CASCADE,
+    liked boolean,
+    PRIMARY KEY (review_id, user_id, liked)
 );
 
 CREATE TABLE IF NOT EXISTS EVENTS
@@ -80,5 +91,6 @@ CREATE TABLE IF NOT EXISTS DIRECTORS
 CREATE TABLE IF NOT EXISTS FILM_DIRECTOR
 (
     film_id     bigint REFERENCES FILMS (film_id) ON DELETE CASCADE,
-    director_id bigint REFERENCES DIRECTORS (director_id) ON DELETE CASCADE
+    director_id bigint REFERENCES DIRECTORS (director_id) ON DELETE CASCADE,
+    CONSTRAINT film_director_pk PRIMARY KEY (film_id, director_id)
 );

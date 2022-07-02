@@ -74,4 +74,13 @@ public class ErrorHandler {
         );
     }
     //	<<the end of the insert from Oleg Sharomov
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleReviewNotFoundException(final ReviewNotFoundException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
 }

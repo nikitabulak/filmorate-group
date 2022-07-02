@@ -147,4 +147,32 @@ public class LikesStorage {
 
         return films;
     }
+
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        if (!userDbStorage.isUserExists(userId)) throw new UserNotFoundException("User not found");
+        if (!userDbStorage.isUserExists(friendId)) throw new UserNotFoundException("User not found");
+        String sql = "SELECT *" +
+                "FROM films AS f " +
+                "LEFT JOIN (SELECT film_id, COUNT(film_id) AS count_like FROM likes GROUP BY film_id) USING (film_id) " +
+                "RIGHT JOIN likes AS l1 ON f.film_id = l1.film_id " +
+                "RIGHT JOIN likes AS l2 ON l1.film_id = l2.film_id " +
+                "WHERE l1.user_id = ? AND l2.user_id = ? " +
+                "ORDER BY count_like DESC;";
+
+        List <Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
+                rs.getLong("film_id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getDate("releaseDate").toLocalDate(),
+                rs.getInt("duration"),
+                genreStorage.getFilmGenres(rs.getLong("film_id")),
+                mpaStorage.getMpa(rs.getInt("rate_id"))
+        ), userId, friendId);
+        for(Film f: films){
+            if(f.getGenres().isEmpty()){
+                f.setGenres(null);
+            }
+        }
+        return films;
+    }
 }
