@@ -159,7 +159,40 @@ public class LikesStorage {
                 "WHERE l1.user_id = ? AND l2.user_id = ? " +
                 "ORDER BY count_like DESC;";
 
-        List <Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
+        return getFilmsBySql(sql, userId, friendId);
+    }
+
+    public List<Film> getRecommendations(Long userId) {
+        if (!userDbStorage.isUserExists(userId)) throw new UserNotFoundException("User not found");
+        List<Film> films = new ArrayList<>();
+
+        String sql = "SELECT l2.user_Id " +
+                "FROM likes AS l1 " +
+                "JOIN likes AS l2 ON l1.film_id = l2.film_id " +
+                "WHERE l1.user_id = ? AND l1.user_id<>l2.user_id " +
+                "GROUP BY l2.user_id " +
+                "ORDER BY COUNT(l2.user_id) DESC " +
+                "LIMIT 1";
+
+        List<Long> id = jdbcTemplate.queryForList(sql, Long.class, userId);
+
+        if (id.isEmpty()) {
+            return films;
+        }
+
+        sql = "SELECT * " +
+                "FROM films AS f " +
+                "JOIN (SELECT film_id FROM likes " +
+                "WHERE USER_ID = ? " +
+                "EXCEPT " +
+                "SELECT film_id FROM likes " +
+                "WHERE USER_ID = ?) AS l ON l.film_id = f.film_id";
+
+        return getFilmsBySql(sql, id.get(0), userId);
+    }
+
+    private List<Film> getFilmsBySql(String sql, Long userId, Long id) {
+        List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
                 rs.getLong("film_id"),
                 rs.getString("name"),
                 rs.getString("description"),
@@ -167,9 +200,9 @@ public class LikesStorage {
                 rs.getInt("duration"),
                 genreStorage.getFilmGenres(rs.getLong("film_id")),
                 mpaStorage.getMpa(rs.getInt("rate_id"))
-        ), userId, friendId);
-        for(Film f: films){
-            if(f.getGenres().isEmpty()){
+        ), userId, id);
+        for (Film f : films) {
+            if (f.getGenres().isEmpty()) {
                 f.setGenres(null);
             }
         }

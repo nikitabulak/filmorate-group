@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.friends.FriendsStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
@@ -18,12 +20,14 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserStorage userStorage;
     private final FriendsStorage friendsStorage;
+    private final LikesStorage likesStorage;
     private Long id = 0L;
 
     @Autowired
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, FriendsStorage friendsStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, FriendsStorage friendsStorage, LikesStorage likesStorage) {
         this.userStorage = userStorage;
         this.friendsStorage = friendsStorage;
+        this.likesStorage = likesStorage;
     }
 
     private Long generateId() {
@@ -73,5 +77,9 @@ public class UserService {
 
     public Collection<Event> getFeed(Long id) {
         return null;
+    }
+
+    public Collection<Film> getRecommendations(Long id) {
+        return likesStorage.getRecommendations(id);
     }
 }
