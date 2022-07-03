@@ -77,7 +77,6 @@ public class FilmController {
         if (count == null) count = 10;
         if (genreId == null) genreId = -1;
         if (year == null) year = -1;
-        System.out.println(count);
         return filmService.getFilmsByRating(count, genreId, year);
     }
 
