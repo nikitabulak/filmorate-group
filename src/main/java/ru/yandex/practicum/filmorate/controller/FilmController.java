@@ -97,4 +97,10 @@ public class FilmController {
     }
     //	<<the end of the insert from Oleg Sharomov
 
+    @GetMapping("/search")
+    public List<Film> search(
+            @RequestParam(required = false) String query, String by) {
+        log.info("Request search films, query = {}, by = {}", query, by);
+        return filmService.search(query, by);
+    }
 }
