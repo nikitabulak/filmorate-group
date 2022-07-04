@@ -10,8 +10,8 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Genre implements Comparable <Genre> {
-    int id;
-    String name;
+    private int id;
+    private String name;
 
     @Override
     public int compareTo(Genre o) {

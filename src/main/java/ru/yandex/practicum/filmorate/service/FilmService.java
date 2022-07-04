@@ -6,7 +6,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.OperationType;
+import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikesStorage;
 
@@ -23,14 +27,17 @@ public class FilmService {
 
     private final FilmStorage filmStorage;
     private final LikesStorage likesStorage;
+    private final EventStorage eventStorage;
     private Long id = 0L;
     private static final LocalDate releaseDate = LocalDate.of(1895, 12, 28);
 
     @Autowired
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
-                       LikesStorage likesStorage) {
+                       LikesStorage likesStorage,
+                       EventStorage eventStorage) {
         this.filmStorage = filmStorage;
         this.likesStorage = likesStorage;
+        this.eventStorage = eventStorage;
     }
 
     private Long generateId() {
@@ -66,17 +73,31 @@ public class FilmService {
                 .orElseThrow(() -> new FilmNotFoundException(String.format("Request film with absent id = %d", id)));
     }
 
-    public void deleteFilmById(Long id){
+    public void deleteFilmById(Long id) {
         filmStorage.deleteById(id);
     }
 
     public void addLike(Long id, Long userId) {
         likesStorage.addLike(id, userId);
+        eventStorage.addNewEvent(new Event.Builder()
+                .setCurrentTimestamp()
+                .setUserId(userId)
+                .setEventType(EventType.LIKE)
+                .setOperationType(OperationType.ADD)
+                .setEntityId(id)
+                .build());
         log.info("User id = {} set like film id = {}", userId, id);
     }
 
     public void removeLike(Long id, Long userId) {
         likesStorage.removeLike(id, userId);
+        eventStorage.addNewEvent(new Event.Builder()
+                .setCurrentTimestamp()
+                .setUserId(userId)
+                .setEventType(EventType.LIKE)
+                .setOperationType(OperationType.REMOVE)
+                .setEntityId(id)
+                .build());
         log.info("User id = {} deleted like to film id = {}", userId, id);
     }
 
@@ -133,7 +154,6 @@ public class FilmService {
                 .collect(Collectors.toList());
 }
     public List<Film> getCommonFilms(long userId, long friendId) {
-        return likesStorage.getCommonFilms(userId,friendId);
-
+        return likesStorage.getCommonFilms(userId, friendId);
     }
 }
