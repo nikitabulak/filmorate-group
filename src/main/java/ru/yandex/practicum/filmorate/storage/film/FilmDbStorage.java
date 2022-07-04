@@ -15,9 +15,7 @@ import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Component("filmDbStorage")
@@ -150,8 +148,43 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+
+    public List<Film> searchByTitle(String query) {
+        String str = "%" + query + "%";
+        String sql = "SELECT * FROM FILMS WHERE LOWER(NAME) LIKE LOWER(?)";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
+                rs.getLong("film_id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getDate("releaseDate").toLocalDate(),
+                rs.getInt("duration"),
+                genreStorage.getFilmGenres(rs.getLong("film_id")),
+                mpaStorage.getMpa(rs.getInt("rate_id")),
+                directorDao.getDirectorsByFilmId(rs.getLong("film_id"))
+        ), str);
+    }
+
+    @Override
+    public List<Film> searchByDirector(String query) {
+        String str = "%" + query + "%";
+        String sql = "select * from FILMS\n" +
+                "         left join FILM_DIRECTOR FD on FILMS.FILM_ID = FD.FILM_ID\n" +
+                "         left join DIRECTORS D on D.DIRECTOR_ID = FD.DIRECTOR_ID\n" +
+                "where lower(d.DIRECTOR_NAME) like lower(?);";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new Film(
+                rs.getLong("film_id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getDate("releaseDate").toLocalDate(),
+                rs.getInt("duration"),
+                genreStorage.getFilmGenres(rs.getLong("film_id")),
+                mpaStorage.getMpa(rs.getInt("rate_id")),
+                directorDao.getDirectorsByFilmId(rs.getLong("film_id"))
+        ), str);
+}
     public Film delete(Film film) {
         deleteById(film.getId());
         return film;
+
     }
 }

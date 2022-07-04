@@ -6,10 +6,7 @@ import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.NotImplementedException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Component("inMemoryFilmStorage")
@@ -53,7 +50,17 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+
+    public List<Film> searchByTitle(String query) {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public List<Film> searchByDirector(String query) {
+        throw new NotImplementedException();
+}
     public void deleteById(Long id){
         throw new NotImplementedException();
+
     }
 }
