@@ -1,25 +1,44 @@
 package ru.yandex.practicum.filmorate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.User;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Disabled
+@AutoConfigureTestDatabase
 public class UserControllerMockMvcTest {
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private UserController controller;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     void shouldAddUser() throws Exception {
@@ -116,5 +135,87 @@ public class UserControllerMockMvcTest {
                                 "}")
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testCommonFilms() throws Exception {
+        String sqlQuery = "DELETE FROM films";
+        jdbcTemplate.update(sqlQuery);
+        sqlQuery = "ALTER TABLE films ALTER COLUMN film_id RESTART WITH 1";
+        jdbcTemplate.update(sqlQuery);
+        sqlQuery = "DELETE FROM likes";
+        jdbcTemplate.update(sqlQuery);
+        Film film1 = new Film(1L,
+                "Missi",
+                "Great film",
+                LocalDate.of(2000, 2, 22),
+                200,
+                null,
+                new Mpa(1, "G"));
+        Film film2 = new Film(2L,
+                "New film",
+                "Film description",
+                LocalDate.of(2021, 2, 22),
+                200,
+                null,
+                new Mpa(1, "G"));
+    Film film3 = new Film(3L,
+            "New film2",
+            "Film description2",
+            LocalDate.of(2021, 2, 22),
+            200,
+            null,
+            new Mpa(1, "G"));
+        User user1 = new User(1L,
+                "mail@mail.ru",
+                "Tommi",
+                "Tom",
+                LocalDate.of(1975, 6, 2));
+        User user2 = new User(2L,
+                "mail@yandex.ru",
+                "Angel",
+                "Angelina",
+                LocalDate.of(1975, 6, 4));
+        mockMvc.perform(
+                post("/films")
+                        .content(objectMapper.writeValueAsString(film1))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
+        mockMvc.perform(
+                post("/films")
+                        .content(objectMapper.writeValueAsString(film2))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
+    mockMvc.perform(
+            post("/films")
+                    .content(objectMapper.writeValueAsString(film3))
+                    .contentType(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isOk());
+        mockMvc.perform(
+                post("/users")
+                        .content(objectMapper.writeValueAsString(user1))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
+        mockMvc.perform(
+                post("/users")
+                        .content(objectMapper.writeValueAsString(user2))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
+        mockMvc.perform(get("/users/1/recommendations"))
+                .andExpect(status().isOk());
+        assertTrue(controller.getRecommendations(1L).isEmpty());
+        mockMvc.perform(put("/films/1/like/1"))
+                .andExpect(status().isOk());
+        mockMvc.perform(put("/films/1/like/2"))
+                .andExpect(status().isOk());
+        mockMvc.perform(put("/films/2/like/2"))
+                .andExpect(status().isOk());
+        assertEquals(1, controller.getRecommendations(1L).size());
+        assertEquals("New film",new ArrayList<>(controller.getRecommendations(1L)).get(0).getName());
+        mockMvc.perform(put("/films/3/like/2"))
+                .andExpect(status().isOk());
+        assertEquals(2, controller.getRecommendations(1L).size());
+        assertEquals("New film",new ArrayList<>(controller.getRecommendations(1L)).get(0).getName());
+        assertEquals("New film2",new ArrayList<>(controller.getRecommendations(1L)).get(1).getName());
     }
 }
