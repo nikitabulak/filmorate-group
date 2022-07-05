@@ -10,9 +10,7 @@ import ru.yandex.practicum.filmorate.exception.ReviewNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.sql.Types;
 import java.util.Collection;
@@ -80,7 +78,7 @@ public class ReviewStorage {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("REVIEWS")
                 .usingGeneratedKeyColumns("review_id");
-        review.setId(simpleJdbcInsert.executeAndReturnKey(review.toMap()).longValue());
+        review.setReviewId(simpleJdbcInsert.executeAndReturnKey(review.toMap()).longValue());
         log.info("New review added: {}", review);
         return review;
     }
@@ -103,16 +101,16 @@ public class ReviewStorage {
     }
 
     public Review update(Review review) {
-        if (isReviewExists(review.getId())) {
+        if (isReviewExists(review.getReviewId())) {
             jdbcTemplate.update(UPDATE_REVIEW_BY_ID_QUERY_TEMPLATE,
                     review.getContent(),
                     review.getIsPositive(),
-                    review.getId());
+                    review.getReviewId());
             log.info("Review {} has been succesfully updated", review);
             return review;
         } else {
             throw new ReviewNotFoundException(String.format("Attempt to update review with " +
-                    "absent id = %d", review.getId()));
+                    "absent id = %d", review.getReviewId()));
         }
     }
 
