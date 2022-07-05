@@ -213,7 +213,7 @@ class FilmorateApplicationTests {
 		assertThat(event).hasFieldOrPropertyWithValue("userId", id)
 				.hasFieldOrPropertyWithValue("eventType", EventType.REVIEW)
 				.hasFieldOrPropertyWithValue("operation", OperationType.ADD)
-				.hasFieldOrPropertyWithValue("entityId", review.getId());
+				.hasFieldOrPropertyWithValue("entityId", review.getReviewId());
 	}
 
 	@Test
@@ -228,7 +228,7 @@ class FilmorateApplicationTests {
 		Long filmId = filmDbStorage.add(film).getId();
 		Review review = new Review(null, "content", true, id, filmId, 0L);
 		reviewService.addReview(review);
-		Review reviewUpdate = new Review(review.getId(), "contentUpdate", true, id, filmId, 0L);
+		Review reviewUpdate = new Review(review.getReviewId(), "contentUpdate", true, id, filmId, 0L);
 		reviewService.updateReview(reviewUpdate);
 
 		Event event = eventStorage.getEventsByUserId(id).get(1);
@@ -236,7 +236,7 @@ class FilmorateApplicationTests {
 		assertThat(event).hasFieldOrPropertyWithValue("userId", id)
 				.hasFieldOrPropertyWithValue("eventType", EventType.REVIEW)
 				.hasFieldOrPropertyWithValue("operation", OperationType.UPDATE)
-				.hasFieldOrPropertyWithValue("entityId", review.getId());
+				.hasFieldOrPropertyWithValue("entityId", review.getReviewId());
 	}
 
 	@Test
@@ -251,7 +251,7 @@ class FilmorateApplicationTests {
 		Long filmId = filmDbStorage.add(film).getId();
 		Review review = new Review(null, "content", true, id, filmId, 0L);
 		reviewService.addReview(review);
-		reviewService.deleteReviewById(review.getId());
+		reviewService.deleteReviewById(review.getReviewId());
 
 		Event event = eventStorage.getEventsByUserId(id).get(1);
 

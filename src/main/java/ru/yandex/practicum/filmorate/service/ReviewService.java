@@ -44,20 +44,20 @@ public class ReviewService {
                 .setUserId(rev.getUserId())
                 .setEventType(EventType.REVIEW)
                 .setOperationType(OperationType.ADD)
-                .setEntityId(rev.getId())
+                .setEntityId(rev.getReviewId())
                 .build());
         return rev;
     }
 
     public Review updateReview(Review review){
-        if (reviewStorage.isReviewExists(review.getId())) {
-            Review rev = reviewStorage.getById(review.getId()).get();
+        if (reviewStorage.isReviewExists(review.getReviewId())) {
+            Review rev = reviewStorage.getById(review.getReviewId()).get();
             eventStorage.addNewEvent(new Event.Builder()
                     .setCurrentTimestamp()
                     .setUserId(rev.getUserId())
                     .setEventType(EventType.REVIEW)
                     .setOperationType(OperationType.UPDATE)
-                    .setEntityId(rev.getId())
+                    .setEntityId(rev.getReviewId())
                     .build());
         }
         return reviewStorage.update(review);

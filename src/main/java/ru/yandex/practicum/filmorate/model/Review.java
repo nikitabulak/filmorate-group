@@ -13,7 +13,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Review {
-    private Long id;
+    private Long reviewId;
     @NotNull
     @NotBlank
     private String content;
