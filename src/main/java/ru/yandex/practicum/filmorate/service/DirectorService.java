@@ -33,7 +33,7 @@ public class DirectorService {
     }
 
     public Director createDirector(Director director) {
-        return directorDao.createDirectorAndReturnId(director);
+        return directorDao.createDirectorAndReturnDirectorWithId(director);
     }
 
     public Director updateDirector(Director director) {

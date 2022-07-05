@@ -24,7 +24,7 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private GenreStorage genreStorage;
     private MpaStorage mpaStorage;
-    private final DirectorStorage directorDao;                       //	insert from Oleg Sharomov
+    private final DirectorStorage directorDao;
 
     public FilmDbStorage(JdbcTemplate jdbcTemplate,
                          GenreStorage genreStorage,
@@ -47,7 +47,7 @@ public class FilmDbStorage implements FilmStorage {
                         film.getId(), genre.getId());
             }
         }
-        //	the insert is made by Oleg Sharomov>>
+
         if (film.getDirectors() != null) {
             for (Director director : film.getDirectors()) { // если режиссер есть - добавляет их в FILM_DIRECTOR
                 if (directorDao.isDirectorExists(director.getId())) {  //проверка присутствия режиссера в DIRECTORS
@@ -60,7 +60,6 @@ public class FilmDbStorage implements FilmStorage {
             }
         }
         film.setDirectors(directorDao.getDirectorsByFilmId(film.getId()));
-        //	<<the end of the insert from Oleg Sharomov
         jdbcTemplate.update("UPDATE FILMS SET RATE_ID = ? WHERE FILM_ID = ?",
                 film.getMpa().getId(),
                 film.getId()
@@ -83,7 +82,7 @@ public class FilmDbStorage implements FilmStorage {
                     film.getMpa().getId(),
                     film.getId());
             genreStorage.updateGenresOfFilm(film);
-            directorDao.updateDirectorsOfFilm(film);            //	insert from Oleg Sharomov
+            directorDao.updateDirectorsOfFilm(film);
             log.info("Film {} has been successfully updated", film);
             return film;
         } else {
@@ -103,7 +102,7 @@ public class FilmDbStorage implements FilmStorage {
                 rs.getInt("duration"),
                 genreStorage.getFilmGenres(rs.getLong("film_id")),
                 mpaStorage.getMpa(rs.getInt("rate_id")),
-                directorDao.getDirectorsByFilmId(rs.getLong("film_id"))    // insert from Oleg Sharomov
+                directorDao.getDirectorsByFilmId(rs.getLong("film_id"))
         ));
     }
 
@@ -124,7 +123,7 @@ public class FilmDbStorage implements FilmStorage {
             if (genres.size() != 0) {
                 film.setGenres(genreStorage.getFilmGenres(id));
             }
-            film.setDirectors(directorDao.getDirectorsByFilmId(id));        //	insert from Oleg Sharomov
+            film.setDirectors(directorDao.getDirectorsByFilmId(id));
             log.info("Found film id = {}", film);
             return Optional.of(film);
         } else {

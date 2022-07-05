@@ -60,7 +60,7 @@ public class FilmService {
         else if (film.getGenres().isEmpty()) filmReturn.setGenres(new HashSet<>());
         if (film.getDirectors() == null) {
             filmReturn.setDirectors(null);
-        }             //	insert from Oleg Sharomov
+        }
         return filmReturn;
     }
 
