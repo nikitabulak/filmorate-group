@@ -1,5 +1,5 @@
 # java-filmorate
 Template repository for Filmorate project.
 
-![](Schema.png)
+![](Schema2.png)
 

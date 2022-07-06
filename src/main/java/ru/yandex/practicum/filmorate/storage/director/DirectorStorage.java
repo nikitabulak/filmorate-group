@@ -50,7 +50,7 @@ public class DirectorStorage {
         }
     }
 
-    public Director createDirectorAndReturnId(Director director) {
+    public Director createDirectorAndReturnDirectorWithId(Director director) {
         String sqlQuery = "INSERT INTO directors (director_name) " +
                 "values (?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();

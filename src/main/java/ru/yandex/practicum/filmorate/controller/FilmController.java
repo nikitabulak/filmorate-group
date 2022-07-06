@@ -21,7 +21,7 @@ import java.util.Optional;
 public class FilmController {
 
     private final FilmService filmService;
-    private final DirectorService directorService;                      //	insert from Oleg Sharomov
+    private final DirectorService directorService;
 
     @Autowired
     public FilmController(FilmService filmService, DirectorService directorService) {
@@ -86,7 +86,6 @@ public class FilmController {
         return filmService.getCommonFilms(userId, friendId);
     }
 
-    //	the insert is made by Oleg Sharomov>>
     // GET /films/director/{directorId}?sortBy=year или /films/director/{directorId}?sortBy=likes
     @GetMapping("/director/{directorId}")
     public List<Film> getSortedFilmsByYearOrDirector(@PathVariable @Positive Long directorId,
@@ -94,7 +93,6 @@ public class FilmController {
         log.info("Received a request to get sorted films by director id = {}", directorId);
         return directorService.getSortedFilmsByDirectorId(directorId, sortBy);
     }
-    //	<<the end of the insert from Oleg Sharomov
 
     @GetMapping("/search")
     public List<Film> search(
