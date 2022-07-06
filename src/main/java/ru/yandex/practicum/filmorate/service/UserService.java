@@ -25,7 +25,6 @@ public class UserService {
     private final FriendsStorage friendsStorage;
     private final EventStorage eventStorage;
     private final LikesStorage likesStorage;
-    private Long id = 0L;
 
     @Autowired
     public UserService(@Qualifier("userDbStorage") UserStorage userStorage,
@@ -36,10 +35,6 @@ public class UserService {
         this.friendsStorage = friendsStorage;
         this.eventStorage = eventStorage;
         this.likesStorage = likesStorage;
-    }
-
-    private Long generateId() {
-        return ++id;
     }
 
     public User addUser(User user) {

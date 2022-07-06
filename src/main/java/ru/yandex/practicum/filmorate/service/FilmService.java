@@ -28,7 +28,6 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final LikesStorage likesStorage;
     private final EventStorage eventStorage;
-    private Long id = 0L;
     private static final LocalDate releaseDate = LocalDate.of(1895, 12, 28);
 
     @Autowired
@@ -38,10 +37,6 @@ public class FilmService {
         this.filmStorage = filmStorage;
         this.likesStorage = likesStorage;
         this.eventStorage = eventStorage;
-    }
-
-    private Long generateId() {
-        return ++id;
     }
 
     public Film addFilm(Film film) {
@@ -55,7 +50,7 @@ public class FilmService {
     public Film updateFilm(Film film) {
         filmStorage.update(film);
         Film filmReturn = filmStorage.getById(film.getId()).orElseThrow(
-                () -> new FilmNotFoundException(String.format("Request film with absent id = %d", id)));
+                () -> new FilmNotFoundException(String.format("Request film with absent id = %d", film.getId())));
         if (film.getGenres() == null) filmReturn.setGenres(null);
         else if (film.getGenres().isEmpty()) filmReturn.setGenres(new HashSet<>());
         if (film.getDirectors() == null) {
