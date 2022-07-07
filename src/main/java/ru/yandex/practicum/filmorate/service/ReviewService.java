@@ -1,11 +1,11 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ReviewNotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.event.EventStorage;
-import ru.yandex.practicum.filmorate.storage.review.ReviewRatingsDao;
 import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
 
 import java.util.Collection;
@@ -16,25 +16,22 @@ import java.util.NoSuchElementException;
 public class ReviewService {
 
     private final ReviewStorage reviewStorage;
-    private final ReviewRatingsDao reviewRatingsDao;
     private final EventStorage eventStorage;
 
     public ReviewService(ReviewStorage reviewStorage,
-                         ReviewRatingsDao reviewRatingsDao,
                          EventStorage eventStorage){
         this.reviewStorage = reviewStorage;
-        this.reviewRatingsDao = reviewRatingsDao;
         this.eventStorage = eventStorage;
     }
 
-    public Collection<Review> getAllReviews(Long filmId, Long count){
+    public Collection<Review> getAllReviews(Long filmId, Long count) {
         return reviewStorage.getAll(filmId, count);
     }
 
-    public Review getReviewById(final Long id){
+    public Review getReviewById(final Long id) {
         return reviewStorage.getById(id).orElseThrow(() ->
                 new ReviewNotFoundException(String.format("Attempt to get review with absent id = %d",
-                       id)));
+                        id)));
     }
 
     public Review addReview(Review review){
@@ -80,19 +77,19 @@ public class ReviewService {
                 .build());
     }
 
-    public void addUserLike(Long id, Long userId){
-        reviewRatingsDao.addLike(id, userId);
+    public void addUserLike(Long id, Long userId) {
+        reviewStorage.addLike(id, userId);
     }
 
-    public void addUserDislike(Long id, Long userId){
-        reviewRatingsDao.addDislike(id, userId);
+    public void addUserDislike(Long id, Long userId) {
+        reviewStorage.addDislike(id, userId);
     }
 
-    public void deleteUserLike(Long id, Long userId){
-        reviewRatingsDao.deleteLike(id, userId);
+    public void deleteUserLike(Long id, Long userId) {
+        reviewStorage.deleteLike(id, userId);
     }
 
-    public void deleteUserDislike(Long id, Long userId){
-        reviewRatingsDao.deleteDislike(id, userId);
+    public void deleteUserDislike(Long id, Long userId) {
+        reviewStorage.deleteDislike(id, userId);
     }
 }
