@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.review;
 
 
 import lombok.RequiredArgsConstructor;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,11 @@ public class ReviewStorageTest {
         String query = "delete from REVIEWS";
         jdbcTemplate.update(query);
         query = "alter table REVIEWS alter column REVIEW_ID restart with 1";
+        jdbcTemplate.update(query);
+
+        query = "delete from REVIEW_RATINGS";
+        jdbcTemplate.update(query);
+        query = "update REVIEWS set useful = 0 where review_id = 1";
         jdbcTemplate.update(query);
     }
 
@@ -111,6 +117,86 @@ public class ReviewStorageTest {
         query = "select REVIEW_ID, CONTENT, IS_POSITIVE, USER_ID, FILM_ID, USEFUL from REVIEWS";
         SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(query);
         assertThat(sqlRowSet.next()).isEqualTo(false);
+    }
+
+    @Test
+    public void testAddLike() {
+        String query = "INSERT INTO REVIEWS (CONTENT, IS_POSITIVE, USER_ID, FILM_ID, USEFUL) values ('testContent', true, 1, 1, 0)";
+        jdbcTemplate.update(query);
+        reviewStorage.addLike(1L, 1L);
+
+        query = "select REVIEW_ID, USER_ID, LIKED from REVIEW_RATINGS";
+        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(query);
+        sqlRowSet.next();
+        Assertions.assertThat(sqlRowSet.getLong("review_id")).isEqualTo(1);
+        Assertions.assertThat(sqlRowSet.getLong("user_id")).isEqualTo(1);
+        Assertions.assertThat(sqlRowSet.getBoolean("liked")).isEqualTo(true);
+
+        query = "select USEFUL from REVIEWS where REVIEW_ID = 1";
+        sqlRowSet = jdbcTemplate.queryForRowSet(query);
+        sqlRowSet.next();
+        Assertions.assertThat(sqlRowSet.getLong("useful")).isEqualTo(1);
+    }
+
+    @Test
+    public void testAddDislike() {
+        String query = "INSERT INTO REVIEWS (CONTENT, IS_POSITIVE, USER_ID, FILM_ID, USEFUL) values ('testContent', true, 1, 1, 0)";
+        jdbcTemplate.update(query);
+        reviewStorage.addDislike(1L, 1L);
+
+        query = "select REVIEW_ID, USER_ID, LIKED from REVIEW_RATINGS";
+        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(query);
+        sqlRowSet.next();
+        Assertions.assertThat(sqlRowSet.getLong("review_id")).isEqualTo(1);
+        Assertions.assertThat(sqlRowSet.getLong("user_id")).isEqualTo(1);
+        Assertions.assertThat(sqlRowSet.getBoolean("liked")).isEqualTo(false);
+
+        query = "select USEFUL from REVIEWS where REVIEW_ID = 1";
+        sqlRowSet = jdbcTemplate.queryForRowSet(query);
+        sqlRowSet.next();
+        Assertions.assertThat(sqlRowSet.getLong("useful")).isEqualTo(-1);
+    }
+
+    @Test
+    public void testDeleteLike() {
+        String query = "INSERT INTO REVIEWS (CONTENT, IS_POSITIVE, USER_ID, FILM_ID, USEFUL) values ('testContent', true, 1, 1, 0)";
+        jdbcTemplate.update(query);
+        query = "INSERT INTO REVIEW_RATINGS (REVIEW_ID, USER_ID, LIKED) values (1, 1, true)";
+        jdbcTemplate.update(query);
+        query = "update REVIEWS set useful = 1 where review_id = 1";
+        jdbcTemplate.update(query);
+
+        reviewStorage.deleteLike(1L, 1L);
+
+        query = "select REVIEW_ID, USER_ID, LIKED from REVIEW_RATINGS";
+        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(query);
+        Assertions.assertThat(sqlRowSet.next()).isEqualTo(false);
+
+        query = "select USEFUL from REVIEWS where REVIEW_ID = 1";
+        sqlRowSet = jdbcTemplate.queryForRowSet(query);
+        sqlRowSet.next();
+        Assertions.assertThat(sqlRowSet.getLong("useful")).isEqualTo(0);
+    }
+
+    @Test
+    public void testDeleteDislike() {
+        String query = "INSERT INTO REVIEWS (CONTENT, IS_POSITIVE, USER_ID, FILM_ID, USEFUL) values ('testContent', true, 1, 1, 0)";
+        jdbcTemplate.update(query);
+        query = "INSERT INTO REVIEW_RATINGS (REVIEW_ID, USER_ID, LIKED) values (1, 1, false)";
+        jdbcTemplate.update(query);
+        query = "update REVIEWS set useful = -1 where review_id = 1";
+        jdbcTemplate.update(query);
+
+        reviewStorage.deleteDislike(1L, 1L);
+
+        query = "select REVIEW_ID, USER_ID, LIKED from REVIEW_RATINGS";
+        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(query);
+        Assertions.assertThat(sqlRowSet.next()).isEqualTo(false);
+
+        query = "select USEFUL from REVIEWS where REVIEW_ID = 1";
+        sqlRowSet = jdbcTemplate.queryForRowSet(query);
+        sqlRowSet.next();
+        Assertions.assertThat(sqlRowSet.getLong("useful")).isEqualTo(0);
     }
 }
 
