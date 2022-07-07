@@ -212,7 +212,7 @@ public class FilmControllerMockMvcTest {
     }
 
     @Test
-    void testMostPopularFilms() throws Exception {
+    void testMostPopularsFilms() throws Exception {
         mockMvc.perform(get("/films/popular")).andExpect(status().is2xxSuccessful());
         assertTrue(controller.popularFilms(10, -1, -1).isEmpty());
         Genre genre = new Genre(1, "Комедия");

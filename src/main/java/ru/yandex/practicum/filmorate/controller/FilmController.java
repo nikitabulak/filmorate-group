@@ -76,9 +76,6 @@ public class FilmController {
                                          @RequestParam(defaultValue = "-1") Integer genreId,
                                          @RequestParam(defaultValue = "-1") Integer year) {
         log.info("Request best films, count = {}, genreId = {}, year = {}", count, genreId, year);
-//        if (count == null) count = 10;
-//        if (genreId == null) genreId = -1;
-//        if (year == null) year = -1;
         return filmService.getFilmsByRating(count, genreId, year);
     }
 
