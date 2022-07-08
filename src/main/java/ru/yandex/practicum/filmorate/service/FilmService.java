@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,21 +24,13 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class FilmService {
 
-    private final FilmStorage filmStorage;
+    @Qualifier("filmDbStorage") private final FilmStorage filmStorage;
     private final LikesStorage likesStorage;
     private final EventStorage eventStorage;
     private static final LocalDate releaseDate = LocalDate.of(1895, 12, 28);
-
-    @Autowired
-    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
-                       LikesStorage likesStorage,
-                       EventStorage eventStorage) {
-        this.filmStorage = filmStorage;
-        this.likesStorage = likesStorage;
-        this.eventStorage = eventStorage;
-    }
 
     public Film addFilm(Film film) {
         if (film.getReleaseDate().isBefore(releaseDate))

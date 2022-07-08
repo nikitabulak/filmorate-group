@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ReviewNotFoundException;
@@ -13,19 +14,12 @@ import java.util.NoSuchElementException;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ReviewService {
 
     private final ReviewStorage reviewStorage;
     private final ReviewRatingsDao reviewRatingsDao;
     private final EventStorage eventStorage;
-
-    public ReviewService(ReviewStorage reviewStorage,
-                         ReviewRatingsDao reviewRatingsDao,
-                         EventStorage eventStorage){
-        this.reviewStorage = reviewStorage;
-        this.reviewRatingsDao = reviewRatingsDao;
-        this.eventStorage = eventStorage;
-    }
 
     public Collection<Review> getAllReviews(Long filmId, Long count){
         return reviewStorage.getAll(filmId, count);
