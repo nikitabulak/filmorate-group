@@ -68,7 +68,7 @@ public class ReviewService {
                 .setUserId(review.getUserId())
                 .setEventType(EventType.REVIEW)
                 .setOperationType(OperationType.REMOVE)
-                .setEntityId(id)
+                .setEntityId(review.getFilmId())
                 .build());
     }
 
