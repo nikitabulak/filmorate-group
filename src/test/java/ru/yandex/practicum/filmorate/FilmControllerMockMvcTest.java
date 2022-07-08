@@ -12,10 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.controller.FilmController;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -227,7 +224,6 @@ public class FilmControllerMockMvcTest {
                 LocalDate.of(2000, 2, 22),
                 200,
                 genres,
-                //new TreeSet<>((SortedSet) new Genre(1, "Комедия")),
                 new Mpa(1, "G"));
         Film film2 = new Film(2L,
                 "New film",
@@ -262,4 +258,80 @@ public class FilmControllerMockMvcTest {
         filmsPopular = (List<Film>) controller.popularFilms(10, 2, 2021);
         assertEquals("New film", filmsPopular.get(0).getName());
     }
+
+
+    @Test
+    void testSearch() throws Exception {
+
+        Genre genre = new Genre(1, "Комедия");
+        Genre genre1 = new Genre(2, "Драма");
+        Director director = new Director(1L, "Director");
+        Director director1 = new Director(2L, "Updated");
+        Set<Genre> genres = new TreeSet<>();
+        Set<Genre> genres1 = new TreeSet<>();
+        Set<Director> directors = new TreeSet<>();
+        Set<Director> directors1 = new TreeSet<>();
+        genres.add(genre);
+        genres1.add(genre1);
+        directors.add(director);
+        directors1.add(director1);
+        Film film1 = new Film(1L,
+                "Missi",
+                "Great film",
+                LocalDate.of(2000, 2, 22),
+                200,
+                genres,
+                new Mpa(1, "G"),
+                directors);
+        Film film2 = new Film(2L,
+                "New film",
+                "Film description",
+                LocalDate.of(2021, 2, 22),
+                200,
+                genres1,
+                new Mpa(1, "G"),
+                directors1);
+
+
+        mockMvc.perform(
+                post("/directors")
+                        .content(objectMapper.writeValueAsString(director))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
+        mockMvc.perform(
+                post("/directors")
+                        .content(objectMapper.writeValueAsString(director1))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
+        mockMvc.perform(
+                post("/films")
+                        .content(objectMapper.writeValueAsString(film1))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
+        mockMvc.perform(
+                post("/films")
+                        .content(objectMapper.writeValueAsString(film2))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
+        mockMvc.perform(get("/films/search?query=mis&by=title")).andExpect(status().is2xxSuccessful());
+        List<Film> filmsSearch = controller.search("mis", "title");
+        assertEquals("Missi", filmsSearch.get(0).getName());
+        mockMvc.perform(get("/films/search?query=fil&by=title")).andExpect(status().is2xxSuccessful());
+        filmsSearch = controller.search("fil", "title");
+        assertEquals("New film", filmsSearch.get(0).getName());
+        mockMvc.perform(get("/films/search?query=ire&by=director")).andExpect(status().is2xxSuccessful());
+        filmsSearch = controller.search("ire", "director");
+        assertEquals("Missi", filmsSearch.get(0).getName());
+        mockMvc.perform(get("/films/search?query=pda&by=director")).andExpect(status().is2xxSuccessful());
+        filmsSearch = controller.search("pda", "director");
+        assertEquals("New film", filmsSearch.get(0).getName());
+        mockMvc.perform(get("/films/search?query=ate&by=director,title")).andExpect(status().is2xxSuccessful());
+        filmsSearch = controller.search("ate", "director,title");
+        assertEquals("New film", filmsSearch.get(0).getName());
+        mockMvc.perform(get("/films/search")).andExpect(status().is2xxSuccessful());
+        filmsSearch = controller.search(null, null);
+        assertEquals(2, filmsSearch.size());
+    }
+
+
 }
