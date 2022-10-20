@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -17,17 +18,12 @@ import java.util.Optional;
 @RestController
 @Validated
 @Slf4j
+@RequiredArgsConstructor
 @RequestMapping("/films")
 public class FilmController {
 
     private final FilmService filmService;
     private final DirectorService directorService;
-
-    @Autowired
-    public FilmController(FilmService filmService, DirectorService directorService) {
-        this.filmService = filmService;
-        this.directorService = directorService;
-    }
 
     @GetMapping
     public Collection<Film> findAll() {
@@ -72,11 +68,10 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<Film> popularFilms(@RequestParam(required = false) Integer count, Integer genreId, Integer year) {
+    public Collection<Film> popularFilms(@RequestParam(defaultValue = "10") Integer count,
+                                         @RequestParam(defaultValue = "-1") Integer genreId,
+                                         @RequestParam(defaultValue = "-1") Integer year) {
         log.info("Request best films, count = {}, genreId = {}, year = {}", count, genreId, year);
-        if (count == null) count = 10;
-        if (genreId == null) genreId = -1;
-        if (year == null) year = -1;
         return filmService.getFilmsByRating(count, genreId, year);
     }
 

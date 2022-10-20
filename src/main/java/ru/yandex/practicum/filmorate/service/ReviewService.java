@@ -13,16 +13,11 @@ import java.util.NoSuchElementException;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ReviewService {
 
     private final ReviewStorage reviewStorage;
     private final EventStorage eventStorage;
-
-    public ReviewService(ReviewStorage reviewStorage,
-                         EventStorage eventStorage){
-        this.reviewStorage = reviewStorage;
-        this.eventStorage = eventStorage;
-    }
 
     public Collection<Review> getAllReviews(Long filmId, Long count) {
         return reviewStorage.getAll(filmId, count);
@@ -34,7 +29,7 @@ public class ReviewService {
                         id)));
     }
 
-    public Review addReview(Review review){
+    public Review addReview(Review review) {
         Review rev = reviewStorage.add(review);
         eventStorage.addNewEvent(new Event.Builder()
                 .setCurrentTimestamp()
@@ -46,7 +41,7 @@ public class ReviewService {
         return rev;
     }
 
-    public Review updateReview(Review review){
+    public Review updateReview(Review review) {
         if (reviewStorage.isReviewExists(review.getReviewId())) {
             Review rev = reviewStorage.getById(review.getReviewId()).get();
             eventStorage.addNewEvent(new Event.Builder()
@@ -60,7 +55,7 @@ public class ReviewService {
         return reviewStorage.update(review);
     }
 
-    public void deleteReviewById(Long id){
+    public void deleteReviewById(Long id) {
         Review review = null;
         try {
             review = reviewStorage.getById(id).get();
@@ -73,7 +68,7 @@ public class ReviewService {
                 .setUserId(review.getUserId())
                 .setEventType(EventType.REVIEW)
                 .setOperationType(OperationType.REMOVE)
-                .setEntityId(id)
+                .setEntityId(review.getFilmId())
                 .build());
     }
 

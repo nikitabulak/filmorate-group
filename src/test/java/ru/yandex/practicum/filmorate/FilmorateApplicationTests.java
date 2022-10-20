@@ -17,9 +17,7 @@ import ru.yandex.practicum.filmorate.storage.like.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.BDDAssertions.catchThrowable;
@@ -267,6 +265,34 @@ class FilmorateApplicationTests {
 				.hasFieldOrPropertyWithValue("eventType", EventType.REVIEW)
 				.hasFieldOrPropertyWithValue("operation", OperationType.REMOVE)
 				.hasFieldOrPropertyWithValue("entityId", filmId);
+	}
+
+	@Test
+	public void testEmptyFeed() {
+		User user = new User(null, "mail@mail.ru", "dolore", "Nick Name",
+				LocalDate.of(1946, 8, 20));
+		Long id = userDbStorage.add(user).getId();
+		Collection<Event> events = userService.getFeed(id);
+		assertThat(events.size()).isEqualTo(0);
+	}
+
+	@Test
+	public void testNotEmptyFeed() {
+		User user = new User(null, "mail@mail.ru", "dolore", "Nick Name",
+				LocalDate.of(1946, 8, 20));
+		Film film = new Film(null, "name", "description",
+				LocalDate.of(1975, 5, 17),
+				100);
+		film.setMpa(new Mpa(1, null));
+		Long id = userDbStorage.add(user).getId();
+		Long filmId = filmDbStorage.add(film).getId();
+		filmService.addLike(filmId, id);
+		List<Event> events = new ArrayList<>(userService.getFeed(id));
+		assertThat(events.size()).isEqualTo(1);
+
+		assertThat(events.get(0)).hasFieldOrPropertyWithValue("userId", id)
+				.hasFieldOrPropertyWithValue("eventType", EventType.LIKE)
+				.hasFieldOrPropertyWithValue("operation", OperationType.ADD);
 	}
 
 	// directors
