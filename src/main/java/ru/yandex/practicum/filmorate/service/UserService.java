@@ -1,13 +1,19 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.OperationType;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.friends.FriendsStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
@@ -15,20 +21,12 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserService {
-    private final UserStorage userStorage;
+    @Qualifier("userDbStorage") private final UserStorage userStorage;
     private final FriendsStorage friendsStorage;
-    private Long id = 0L;
-
-    @Autowired
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, FriendsStorage friendsStorage) {
-        this.userStorage = userStorage;
-        this.friendsStorage = friendsStorage;
-    }
-
-    private Long generateId() {
-        return ++id;
-    }
+    private final EventStorage eventStorage;
+    private final LikesStorage likesStorage;
 
     public User addUser(User user) {
         return userStorage.add(user);
@@ -37,24 +35,42 @@ public class UserService {
     public User updateUser(User user) {
         return userStorage.update(user);
     }
+
     public Collection<User> getUsers() {
         System.out.println(userStorage.getAll());
         return userStorage.getAll();
     }
-    public User deleteUser(User user) {
-        return userStorage.delete(user);
+
+    public void deleteUserById(Long id){
+        userStorage.deleteById(id);
     }
+
     public User getUserById(Long id) {
         return userStorage.getById(id).orElseThrow(() ->
                 new UserNotFoundException(String.format("Request user with absent id = %d", id)));
     }
+
     public void addFriend(Long id, Long friendId) {
         friendsStorage.addFriend(id, friendId);
+        eventStorage.addNewEvent(new Event.Builder()
+                .setCurrentTimestamp()
+                .setUserId(id)
+                .setEventType(EventType.FRIEND)
+                .setOperationType(OperationType.ADD)
+                .setEntityId(friendId)
+                .build());
         log.info("User id = {} added to friends user id={}", id, friendId);
     }
 
     public void deleteFriend(Long id, Long friendId) {
         friendsStorage.deleteFriend(id, friendId);
+        eventStorage.addNewEvent(new Event.Builder()
+                .setCurrentTimestamp()
+                .setUserId(id)
+                .setEventType(EventType.FRIEND)
+                .setOperationType(OperationType.REMOVE)
+                .setEntityId(friendId)
+                .build());
         log.info("User id = {} deleted from friends user id={}", id, friendId);
     }
 
@@ -66,10 +82,13 @@ public class UserService {
         return findFriends(id).stream()
                 .filter(x -> findFriends(otherId).contains(x))
                 .collect(Collectors.toList());
-
     }
 
     public Collection<Event> getFeed(Long id) {
-        return null;
+        return eventStorage.getEventsByUserId(id);
+    }
+
+    public Collection<Film> getRecommendations(Long id) {
+        return likesStorage.getRecommendations(id);
     }
 }

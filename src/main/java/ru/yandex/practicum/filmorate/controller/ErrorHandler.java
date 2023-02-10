@@ -64,7 +64,7 @@ public class ErrorHandler {
                 e.getMessage()
         );
     }
-    //	the insert is made by Oleg Sharomov>>
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleDirectorNotFoundException(final DirectorNotFoundException e) {
@@ -73,7 +73,6 @@ public class ErrorHandler {
                 e.getMessage()
         );
     }
-    //	<<the end of the insert from Oleg Sharomov
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
